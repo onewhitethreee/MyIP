@@ -6,7 +6,7 @@
                 <i class="bi bi-info-circle-fill"></i>
                 <span class="fw-light">&nbsp;{{ t('ipInfos.ASNInfo.note') }}</span>
                 <br />
-                <template v-for="(item,key) in asnInfos[asn]">
+                <template v-for="(item,key) in asnInfos[asn]" :key="key">
                     <span class="fw-light">
                         {{ t(`ipInfos.ASNInfo.${key}`) }}
                     </span>

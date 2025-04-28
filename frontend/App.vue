@@ -15,7 +15,7 @@
       <AdvancedTools ref="advancedToolsRef" />
     </div>
   </div>
-  <InfoMask :showMaskButton.value="showMaskButton" :infoMaskLevel.value="infoMaskLevel"
+  <InfoMask :showMaskButton="showMaskButton" :infoMaskLevel="infoMaskLevel"
     :toggleInfoMask="toggleInfoMask" />
   <QueryIP ref="queryIPRef" />
   <HelpModal ref="helpModalRef" />
