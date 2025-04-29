@@ -12,19 +12,32 @@
                             <label for="queryMAC" class="col-form-label">{{ t('macchecker.Note2') }}</label>
                         </div>
 
-                        <div class="input-group mb-2 mt-2 ">
+                        <div class="input-group mb-2 mt-2">
                             <input type="text" class="form-control" :class="{ 'dark-mode': isDarkMode }"
                                 :disabled="macCheckStatus === 'running'" :placeholder="t('macchecker.Placeholder')"
                                 v-model="queryMAC" @keyup.enter="onSubmit" name="queryMAC" id="queryMAC" data-1p-ignore>
 
                             <button class="btn btn-primary" @click="onSubmit"
                                 :disabled="macCheckStatus === 'running' || !queryMAC">
-                                <span v-if="macCheckStatus !== 'running'">{{
-                                    t('macchecker.Run') }}</span>
+                                <span v-if="macCheckStatus !== 'running'">{{ t('macchecker.Run') }}</span>
                                 <span v-else class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                             </button>
-
                         </div>
+
+                        <!-- 添加服务器选择 -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ t('macchecker.SelectServers') }}</label>
+                            <div class="server-options">
+                                <div v-for="server in availableServers" :key="server" class="form-check">
+                                    <input type="checkbox" class="form-check-input" 
+                                        :id="server" 
+                                        v-model="selectedServers" 
+                                        :value="server">
+                                    <label class="form-check-label" :for="server">{{ server }}</label>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="jn-placeholder">
                             <p v-if="errorMsg" class="text-danger">{{ errorMsg }}</p>
                         </div>
@@ -116,7 +129,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
@@ -155,6 +168,24 @@ const tableItems = computed(() => {
     ];
 });
 
+const availableServers = ref([]);
+const selectedServers = ref(['api.maclookup.app/v2/macs']); // 默认选中第一个服务器
+
+// 获取可用的服务器列表
+const fetchServers = async () => {
+    try {
+        const response = await fetch('/l-api/mac/servers');
+        if (!response.ok) {
+            throw new Error('Failed to fetch servers');
+        }
+        const data = await response.json();
+        availableServers.value = data.servers;
+    } catch (error) {
+        console.error('Error fetching servers:', error);
+        errorMsg.value = t('macchecker.serversFetchError');
+    }
+};
+
 // 检查 MAC 是否有效
 const validateInput = (input) => {
     if (!input) return null;
@@ -185,7 +216,8 @@ const onSubmit = () => {
 const getMacInfo = async (query) => {
     macCheckStatus.value = 'running';
     try {
-        const response = await fetch(`/api/macchecker?mac=${query}`);
+        const servers = selectedServers.value.join(',');
+        const response = await fetch(`/api/macchecker?mac=${query}&servers=${servers}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -199,6 +231,10 @@ const getMacInfo = async (query) => {
     }
 };
 
+// 在组件挂载时获取服务器列表
+onMounted(() => {
+    fetchServers();
+});
 </script>
 
 <style scoped>
@@ -213,5 +249,16 @@ const getMacInfo = async (query) => {
     align-items: flex-start;
     flex-wrap: wrap;
     margin-bottom: 10pt;
+}
+
+.server-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.form-check {
+    min-width: 200px;
 }
 </style>

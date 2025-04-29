@@ -389,7 +389,8 @@
     "isLocal": "Local address",
     "property": "Address property",
     "value": "Value",
-    "manufacturer": "Manufacturer details"
+    "manufacturer": "Manufacturer details",
+    "SelectServers": "Select Query Servers"
   },
   "whois": {
     "Title": "Whois Search",

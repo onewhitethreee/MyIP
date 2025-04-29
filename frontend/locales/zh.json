@@ -389,7 +389,9 @@
     "isLocal": "本地地址",
     "property": "地址属性",
     "value": "值",
-    "manufacturer": "制造商信息"
+    "manufacturer": "制造商信息",
+    "SelectServers": "选择查询服务器"
+    
   },
   "whois": {
     "Title": "Whois 查询",
