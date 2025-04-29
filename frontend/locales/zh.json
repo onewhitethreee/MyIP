@@ -390,7 +390,10 @@
     "property": "地址属性",
     "value": "值",
     "manufacturer": "制造商信息",
-    "SelectServers": "选择查询服务器"
+    "SelectServers": "选择查询服务器",
+    "serversFetchError": "无法获取服务器列表，将使用默认服务器",
+    "ClearCache": "清除缓存",
+    "CacheCleared": "缓存已成功清除"
     
   },
   "whois": {

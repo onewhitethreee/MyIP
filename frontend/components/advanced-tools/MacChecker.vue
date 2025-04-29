@@ -28,14 +28,30 @@
                         <div class="mb-3">
                             <label class="form-label">{{ t('macchecker.SelectServers') }}</label>
                             <div class="server-options">
-                                <div v-for="server in availableServers" :key="server" class="form-check">
-                                    <input type="checkbox" class="form-check-input" 
-                                        :id="server" 
-                                        v-model="selectedServers" 
-                                        :value="server">
-                                    <label class="form-check-label" :for="server">{{ server }}</label>
+                                <div class="form-check" v-for="server in availableServers" :key="server">
+                                    <input 
+                                        type="radio" 
+                                        class="form-check-input" 
+                                        :class="{
+                                            'jn-check-dark': isDarkMode,
+                                            'jn-check-light': !isDarkMode
+                                        }"
+                                        :name="'server_' + server"
+                                        :id="'server_' + server"
+                                        :value="server"
+                                        v-model="selectedServer">
+                                    <label class="form-check-label jn-number" :for="'server_' + server">
+                                        {{ server }}
+                                    </label>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- 添加清除缓存按钮 -->
+                        <div class="mt-2 mb-2 d-flex justify-content-end">
+                            <button class="btn btn-sm btn-outline-secondary" @click="clearCache">
+                                <i class="bi bi-trash"></i> {{ t('macchecker.ClearCache') || '清除缓存' }}
+                            </button>
                         </div>
 
                         <div class="jn-placeholder">
@@ -147,6 +163,73 @@ const macCheckStatus = ref("idle");
 const queryMAC = ref('');
 const errorMsg = ref('');
 
+// 缓存相关常量
+const CACHE_KEY = 'mac_lookup_cache';
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24小时
+
+const availableServers = ref(['api.maclookup.app/v2/macs', 'api.macvendors.com']);
+const selectedServer = ref('api.maclookup.app/v2/macs'); // 默认服务器
+
+// 缓存管理
+const cache = {
+    get(mac, server) {
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (!cached) return null;
+
+            const cacheData = JSON.parse(cached);
+            const cacheKey = `${mac}_${server}`;
+            const item = cacheData[cacheKey];
+
+            if (!item) return null;
+            if (Date.now() - item.timestamp > CACHE_EXPIRY) {
+                delete cacheData[cacheKey];
+                localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+                return null;
+            }
+
+            return item.data;
+        } catch (error) {
+            console.error('Cache read error:', error);
+            return null;
+        }
+    },
+
+    set(mac, server, data) {
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            const cacheData = cached ? JSON.parse(cached) : {};
+            const cacheKey = `${mac}_${server}`;
+
+            cacheData[cacheKey] = {
+                data,
+                timestamp: Date.now()
+            };
+
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        } catch (error) {
+            console.error('Cache write error:', error);
+        }
+    },
+
+    clear() {
+        try {
+            localStorage.removeItem(CACHE_KEY);
+        } catch (error) {
+            console.error('Cache clear error:', error);
+        }
+    }
+};
+
+// 清除缓存
+const clearCache = () => {
+    cache.clear();
+    errorMsg.value = t('macchecker.CacheCleared') || '缓存已清除';
+    setTimeout(() => {
+        errorMsg.value = '';
+    }, 2000);
+};
+
 const leftItems = computed(() => {
     return [
         { key: 'macPrefix' },
@@ -168,10 +251,57 @@ const tableItems = computed(() => {
     ];
 });
 
-const availableServers = ref([]);
-const selectedServers = ref(['api.maclookup.app/v2/macs']); // 默认选中第一个服务器
+// 获取 MAC 信息的函数
+const getMacInfo = async (mac) => {
+    if (!mac) return;
+    
+    // 检查缓存
+    const cachedResult = cache.get(mac, selectedServer.value);
+    if (cachedResult) {
+        macCheckResult.value = cachedResult;
+        macCheckResult.value.success = true;
+        return;
+    }
 
-// 获取可用的服务器列表
+    macCheckStatus.value = 'running';
+    errorMsg.value = '';
+    
+    try {
+        const response = await fetch(`/l-api/mac?q=${encodeURIComponent(mac)}&servers=${selectedServer.value}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        
+        if (data.error) {
+            errorMsg.value = data.error;
+            macCheckResult.value = {};
+        } else {
+            const result = data[selectedServer.value] || {};
+            macCheckResult.value = result;
+            macCheckResult.value.success = true;
+            
+            // 保存到缓存
+            if (Object.keys(result).length > 0) {
+                cache.set(mac, selectedServer.value, result);
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        errorMsg.value = t('macchecker.fetchError');
+        macCheckResult.value = {};
+    } finally {
+        macCheckStatus.value = 'idle';
+    }
+};
+
+// 提交查询
+const onSubmit = () => {
+    if (!queryMAC.value || macCheckStatus.value === 'running') return;
+    getMacInfo(queryMAC.value);
+};
+
+// 获取服务器列表并设置默认值
 const fetchServers = async () => {
     try {
         const response = await fetch('/l-api/mac/servers');
@@ -179,55 +309,18 @@ const fetchServers = async () => {
             throw new Error('Failed to fetch servers');
         }
         const data = await response.json();
-        availableServers.value = data.servers;
+        availableServers.value = data.servers || availableServers.value;
+        // 确保设置默认服务器
+        if (availableServers.value.length > 0 && !selectedServer.value) {
+            selectedServer.value = availableServers.value[0];
+        }
     } catch (error) {
         console.error('Error fetching servers:', error);
         errorMsg.value = t('macchecker.serversFetchError');
-    }
-};
-
-// 检查 MAC 是否有效
-const validateInput = (input) => {
-    if (!input) return null;
-    // 清理所有的分隔符和空格
-    const normalizedInput = input.replace(/[:-]/g, '')
-        .replace(/\s+/g, '');
-    // 检查长度和格式
-    if (normalizedInput.length < 6 || normalizedInput.length > 12 || !/^[0-9A-Fa-f]+$/.test(normalizedInput)) {
-        errorMsg.value = t('macchecker.invalidMAC');
-        return null;
-    }
-
-    return normalizedInput;
-};
-
-// 提交查询
-const onSubmit = () => {
-    trackEvent('Section', 'StartClick', 'MACChecker');
-    errorMsg.value = '';
-    macCheckResult.value = {};
-    const query = validateInput(queryMAC.value);
-    if (query) {
-        getMacInfo(query);
-    }
-};
-
-// 获取 MAC 信息
-const getMacInfo = async (query) => {
-    macCheckStatus.value = 'running';
-    try {
-        const servers = selectedServers.value.join(',');
-        const response = await fetch(`/api/macchecker?mac=${query}&servers=${servers}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        // 如果获取服务器列表失败，使用默认值
+        if (!selectedServer.value && availableServers.value.length > 0) {
+            selectedServer.value = availableServers.value[0];
         }
-        const data = await response.json();
-        macCheckResult.value = data;
-        macCheckStatus.value = 'idle';
-    } catch (error) {
-        console.error('Error fetching MAC results:', error);
-        macCheckStatus.value = 'idle';
-        errorMsg.value = t('macchecker.fetchError');
     }
 };
 
@@ -252,13 +345,11 @@ onMounted(() => {
 }
 
 .server-options {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
     margin-bottom: 1rem;
 }
 
-.form-check {
-    min-width: 200px;
+.jn-number {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.9rem;
 }
 </style>

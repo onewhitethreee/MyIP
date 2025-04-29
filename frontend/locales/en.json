@@ -390,7 +390,10 @@
     "property": "Address property",
     "value": "Value",
     "manufacturer": "Manufacturer details",
-    "SelectServers": "Select Query Servers"
+    "SelectServers": "Select Query Servers",
+    "serversFetchError": "Unable to fetch server list, using default servers",
+    "ClearCache": "Clear Cache",
+    "CacheCleared": "Cache cleared successfully"
   },
   "whois": {
     "Title": "Whois Search",
