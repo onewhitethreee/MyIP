@@ -148,7 +148,7 @@ const onSubmit = () => {
 const getWhoisResults = async (query) => {
     whoisCheckStatus.value = 'running';
     try {
-        const response = await fetch(`/api/whois?q=${query}`);
+        const response = await fetch(`/laravel-api/whois?q=${query}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
