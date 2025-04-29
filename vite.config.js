@@ -162,7 +162,12 @@ export default defineConfig({
     host: '0.0.0.0',
     port: frontEndPort,
     proxy: {
-      '/api': `http://localhost:${backEndPort}`
+      '/api': `http://localhost:${backEndPort}`,
+      '/l-api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/l-api/, '/api')
+      }
     }
   }
 })

@@ -28,6 +28,15 @@
 
                         </div>
 
+                        <!-- Whois 服务器选择 -->
+                        <div class="mt-3">
+                            <div class="form-check form-check-inline" v-for="server in availableServers" :key="server">
+                                <input class="form-check-input" type="checkbox" :id="'server-' + server" 
+                                    v-model="selectedServers" :value="server" :disabled="whoisCheckStatus === 'running'">
+                                <label class="form-check-label" :for="'server-' + server">{{ server }}</label>
+                            </div>
+                        </div>
+
                         <div class="jn-placeholder">
                             <p v-if="errorMsg" class="text-danger">{{ errorMsg }}</p>
                         </div>
@@ -94,6 +103,16 @@ const errorMsg = ref('');
 const providers = ref([]);
 const type = ref('');
 const whoisResults = ref({});
+const availableServers = ref([
+    'whois.godaddy.com',
+    'whois.iana.org',
+    'whois.arin.net',
+    'whois.apnic.net',
+    'whois.ripe.net',
+    'whois.lacnic.net',
+    'whois.afrinic.net'
+]);
+const selectedServers = ref(['whois.godaddy.com']);
 
 // 检查 URL 输入是否有效
 const formatURL = (domain) => {
@@ -148,24 +167,38 @@ const onSubmit = () => {
 const getWhoisResults = async (query) => {
     whoisCheckStatus.value = 'running';
     try {
-        const response = await fetch(`/laravel-api/whois?q=${query}`);
+        const serverParam = selectedServers.value.join(',');
+        const response = await fetch(`/l-api/whois?q=${query}&servers=${serverParam}`);
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            if (response.status === 429) {
+                errorMsg.value = t('whois.rateLimit');
+            } else {
+                throw new Error('Network response was not ok');
+            }
+            return;
         }
         const data = await response.json();
-        getProviders(data);
-        if (type.value === 'domain' && providers.value.length >= 1) {
-            whoisResults.value = data;
-            // 成就检查
-            if (isSignedIn.value && query.toLowerCase().includes('ipcheck.ing')) {
-                checkAchievements();
+        if (type.value === 'domain') {
+            // 域名查询结果处理
+            whoisResults.value = data[query];
+            providers.value = Object.keys(data[query]);
+            if (providers.value.length >= 1) {
+                if (isSignedIn.value && query.toLowerCase().includes('ipcheck.ing')) {
+                    checkAchievements();
+                }
+                errorMsg.value = '';
+            } else {
+                errorMsg.value = t('whois.fetchError');
             }
-            errorMsg.value = '';
-        } else if (type.value === 'ip' && data.__raw) {
-            whoisResults.value = data;
-            errorMsg.value = '';
         } else {
-            errorMsg.value = t('whois.fetchError');
+            // IP 查询结果处理
+            whoisResults.value = data;
+            providers.value = Object.keys(data);
+            if (providers.value.length >= 1) {
+                errorMsg.value = '';
+            } else {
+                errorMsg.value = t('whois.fetchError');
+            }
         }
         whoisCheckStatus.value = 'idle';
     } catch (error) {
@@ -178,13 +211,9 @@ const getWhoisResults = async (query) => {
 // 获取 Whois 服务商
 const getProviders = (data) => {
     if (type.value === 'domain') {
-        for (const [key, value] of Object.entries(data)) {
-            if (key.match(/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i)) {
-                if (data[key].__raw) {
-                    providers.value.push(key);
-                }
-            }
-        }
+        providers.value = Object.keys(data[Object.keys(data)[0]]);
+    } else {
+        providers.value = Object.keys(data);
     }
 };
 
