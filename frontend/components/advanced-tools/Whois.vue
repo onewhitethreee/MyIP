@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
@@ -103,16 +103,42 @@ const errorMsg = ref('');
 const providers = ref([]);
 const type = ref('');
 const whoisResults = ref({});
-const availableServers = ref([
-    'whois.godaddy.com',
-    'whois.iana.org',
-    'whois.arin.net',
-    'whois.apnic.net',
-    'whois.ripe.net',
-    'whois.lacnic.net',
-    'whois.afrinic.net'
-]);
-const selectedServers = ref(['whois.godaddy.com']);
+const availableServers = ref([]);
+const selectedServers = ref([]);
+
+// 获取 WHOIS 服务器列表
+const fetchWhoisServers = async () => {
+    try {
+        const response = await fetch('/l-api/whois/servers');
+        if (!response.ok) {
+            throw new Error('Failed to fetch WHOIS servers');
+        }
+        const data = await response.json();
+        availableServers.value = data.servers;
+        // 设置默认服务器为第一个服务器
+        if (availableServers.value.length > 0) {
+            selectedServers.value = [availableServers.value[0]];
+        }
+    } catch (error) {
+        console.error('Error fetching WHOIS servers:', error);
+        // 设置默认服务器列表
+        availableServers.value = [
+            'whois.godaddy.com',
+            'whois.iana.org',
+            'whois.arin.net',
+            'whois.apnic.net',
+            'whois.ripe.net',
+            'whois.lacnic.net',
+            'whois.afrinic.net'
+        ];
+        selectedServers.value = ['whois.godaddy.com'];
+    }
+};
+
+// 在组件挂载时获取服务器列表
+onMounted(() => {
+    fetchWhoisServers();
+});
 
 // 检查 URL 输入是否有效
 const formatURL = (domain) => {
