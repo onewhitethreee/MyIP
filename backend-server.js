@@ -21,7 +21,7 @@ import cfHander from './api/cf-radar.js';
 import dnsResolver from './api/dns-resolver.js';
 // import getWhois from './api/get-whois.js';
 import invisibilitytestHandler from './api/invisibility-test.js';
-import macChecker from './api/mac-checker.js';
+// import macChecker from './api/mac-checker.js';
 // User
 import validateConfigs from './api/configs.js';
 import getUserinfo from './api/get-user-info.js';
@@ -145,7 +145,7 @@ app.get('/api/dnsresolver', dnsResolver);
 app.get('/api/ipapiis', ipapiisHandler);
 app.get('/api/ip2location', ip2locationHandler);
 app.get('/api/invisibility', invisibilitytestHandler);
-app.get('/api/macchecker', macChecker);
+// app.get('/api/macchecker', macChecker);
 app.get('/api/maxmind', maxmindHandler);
 app.get('/api/getuserinfo', getUserinfo);
 app.put('/api/updateuserachievement', updateUserAchievement);
