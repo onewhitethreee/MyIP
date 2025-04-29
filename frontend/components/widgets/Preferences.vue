@@ -18,22 +18,22 @@
                 <div class="form-label col-12 preferences-title"><i class="bi bi-translate"></i> {{
                     t('nav.preferences.language') }}</div>
                 <div class="btn-group-vertical col-auto w-50 mb-2" role="group" aria-label="Color Scheme">
-                    <template v-for="lang in ['auto','zh', 'en', 'fr']">
-                        <input type="radio" class="btn-check" :name="'language' + lang" :id="'language' + lang"
-                            autocomplete="off" :value="lang" v-model="userPreferences.lang"
-                            @change="prefLanguage(lang)">
-                        <label class="btn jn-number text-start" :class="{
-                            'btn-outline-dark': !isDarkMode,
-                            'btn-outline-light': isDarkMode,
-                            'active fw-bold': userPreferences.lang === lang
-                        }" :for="'language' + lang">
-                            <span v-if="lang === 'zh'"><i class="fi fi-cn"></i> 中文&nbsp;</span>
-                            <span v-else-if="lang === 'en'"><i class="fi fi-us"></i> English&nbsp;</span>
-                            <span v-else-if="lang === 'fr'"><i class="fi fi-fr"></i> Français&nbsp;</span>
-                            <span v-else>{{ t('nav.preferences.systemAuto') }}&nbsp;</span>
-                            <i class="bi bi-check2-circle" v-if="userPreferences.lang === lang"></i>
-                        </label>
-                    </template>
+                    <input v-for="lang in ['auto','zh', 'en', 'fr']" :key="'input-'+lang"
+                        type="radio" class="btn-check" :name="'language' + lang" :id="'language' + lang"
+                        autocomplete="off" :value="lang" v-model="userPreferences.lang"
+                        @change="prefLanguage(lang)">
+                    <label v-for="lang in ['auto','zh', 'en', 'fr']" :key="'label-'+lang"
+                        class="btn jn-number text-start" :class="{
+                        'btn-outline-dark': !isDarkMode,
+                        'btn-outline-light': isDarkMode,
+                        'active fw-bold': userPreferences.lang === lang
+                    }" :for="'language' + lang">
+                        <span v-if="lang === 'zh'"><i class="fi fi-cn"></i> 中文&nbsp;</span>
+                        <span v-else-if="lang === 'en'"><i class="fi fi-us"></i> English&nbsp;</span>
+                        <span v-else-if="lang === 'fr'"><i class="fi fi-fr"></i> Français&nbsp;</span>
+                        <span v-else>{{ t('nav.preferences.systemAuto') }}&nbsp;</span>
+                        <i class="bi bi-check2-circle" v-if="userPreferences.lang === lang"></i>
+                    </label>
                 </div>
                 <div class="preferences-tip">{{ t('nav.preferences.languageTips') }}</div>
             </div>
@@ -44,22 +44,22 @@
                 <div class="form-label col-12 preferences-title"><i class="bi bi-palette-fill"></i> {{
                     t('nav.preferences.colorScheme') }}</div>
                 <div class="btn-group col-auto" role="group" aria-label="Color Scheme">
-                    <template v-for="theme in ['auto', 'light', 'dark']">
-                        <input type="radio" class="btn-check" :name="'darkMode' + theme" :id="'darkMode' + theme"
-                            autocomplete="off" :value="theme" v-model="userPreferences.theme"
-                            @change="prefTheme(theme)">
-                        <label class="btn" :class="{
-                            'btn-outline-dark': !isDarkMode,
-                            'btn-outline-light': isDarkMode,
-                            'active fw-bold': userPreferences.theme === theme
-                        }" :for="'darkMode' + theme">
-                            <span v-if="theme === 'light'"><i class="bi bi-brightness-high"></i> {{
-                                t('nav.preferences.colorLight') }}</span>
-                            <span v-else-if="theme === 'dark'"><i class="bi bi-moon-stars"></i> {{
-                                t('nav.preferences.colorDark') }}</span>
-                            <span v-else>{{ t('nav.preferences.systemAuto') }}</span>
-                        </label>
-                    </template>
+                    <input v-for="theme in ['auto', 'light', 'dark']" :key="'input-'+theme"
+                        type="radio" class="btn-check" :name="'darkMode' + theme" :id="'darkMode' + theme"
+                        autocomplete="off" :value="theme" v-model="userPreferences.theme"
+                        @change="prefTheme(theme)">
+                    <label v-for="theme in ['auto', 'light', 'dark']" :key="'label-'+theme"
+                        class="btn" :class="{
+                        'btn-outline-dark': !isDarkMode,
+                        'btn-outline-light': isDarkMode,
+                        'active fw-bold': userPreferences.theme === theme
+                    }" :for="'darkMode' + theme">
+                        <span v-if="theme === 'light'"><i class="bi bi-brightness-high"></i> {{
+                            t('nav.preferences.colorLight') }}</span>
+                        <span v-else-if="theme === 'dark'"><i class="bi bi-moon-stars"></i> {{
+                            t('nav.preferences.colorDark') }}</span>
+                        <span v-else>{{ t('nav.preferences.systemAuto') }}</span>
+                    </label>
                 </div>
             </div>
 
@@ -70,17 +70,16 @@
                     <i class="bi bi-ui-checks-grid"></i> {{ t('nav.preferences.ipSourcesToCheck') }}
                 </div>
                 <div class="btn-group col-auto w-50 mb-2" role="group" aria-label="ipCards">
-                    <template v-for="num in [3, 6]">
-                        <input v-model="userPreferences.ipCardsToShow" type="radio" class="btn-check"
-                            :name="'ipCards_' + num" :id="'ipCards_' + num" autocomplete="off" :value=num
-                            @change="prefipCards(num)">
-                        <label class="btn jn-number" :class="{
-                            'btn-outline-dark': !isDarkMode,
-                            'btn-outline-light': isDarkMode,
-                            'active fw-bold': userPreferences.ipCardsToShow === num
-                        }" :for="'ipCards_' + num">{{ num
-                            }}</label>
-                    </template>
+                    <input v-for="num in [3, 6]" :key="'input-'+num"
+                        v-model="userPreferences.ipCardsToShow" type="radio" class="btn-check"
+                        :name="'ipCards_' + num" :id="'ipCards_' + num" autocomplete="off" :value=num
+                        @change="prefipCards(num)">
+                    <label v-for="num in [3, 6]" :key="'label-'+num"
+                        class="btn jn-number" :class="{
+                        'btn-outline-dark': !isDarkMode,
+                        'btn-outline-light': isDarkMode,
+                        'active fw-bold': userPreferences.ipCardsToShow === num
+                    }" :for="'ipCards_' + num">{{ num }}</label>
                 </div>
                 <div class="preferences-tip">{{ t('nav.preferences.ipSourcesToCheckTips') }}</div>
             </div>
@@ -92,20 +91,20 @@
                     <i class="bi bi-ui-checks-grid"></i> {{ t('nav.preferences.ipDB') }}
                 </div>
                 <div class="btn-group-vertical col-auto w-50 mb-2" role="group" aria-label="ipGeoSource">
-                    <template v-for="ipdb in ipDBs">
-                        <input v-model="userPreferences.ipGeoSource" type="radio" class="btn-check"
-                            :name="'ipGeoSource_' + ipdb.text" :id="'ipGeoSource_' + ipdb.id" autocomplete="off"
-                            :value=ipdb.id @change="prefipGeoSource(ipdb.id)">
-                        <label class="btn jn-number text-start" :class="{
-                            'btn-outline-dark': !isDarkMode,
-                            'btn-outline-light': isDarkMode,
-                            'active fw-bold': userPreferences.ipGeoSource === ipdb.id,
-                            'jn-disabled-button': !ipdb.enabled
-                        }" :for="'ipGeoSource_' + ipdb.id" :aria-disabled="!ipdb.enabled" :aria-label="ipdb.text">
-                            <span :class="[ipdb.enabled ? '' : 'jn-disabled-text']">{{ ipdb.text }}&nbsp;</span>
-                            <i class="bi bi-check2-circle" v-if="userPreferences.ipGeoSource === ipdb.id"></i>
-                        </label>
-                    </template>
+                    <input v-for="ipdb in ipDBs" :key="'input-'+ipdb.id"
+                        v-model="userPreferences.ipGeoSource" type="radio" class="btn-check"
+                        :name="'ipGeoSource_' + ipdb.text" :id="'ipGeoSource_' + ipdb.id" autocomplete="off"
+                        :value=ipdb.id @change="prefipGeoSource(ipdb.id)">
+                    <label v-for="ipdb in ipDBs" :key="'label-'+ipdb.id"
+                        class="btn jn-number text-start" :class="{
+                        'btn-outline-dark': !isDarkMode,
+                        'btn-outline-light': isDarkMode,
+                        'active fw-bold': userPreferences.ipGeoSource === ipdb.id,
+                        'jn-disabled-button': !ipdb.enabled
+                    }" :for="'ipGeoSource_' + ipdb.id" :aria-disabled="!ipdb.enabled" :aria-label="ipdb.text">
+                        <span :class="[ipdb.enabled ? '' : 'jn-disabled-text']">{{ ipdb.text }}&nbsp;</span>
+                        <i class="bi bi-check2-circle" v-if="userPreferences.ipGeoSource === ipdb.id"></i>
+                    </label>
                 </div>
                 <div class="preferences-tip">{{ t('nav.preferences.ipDBTips') }}</div>
             </div>
