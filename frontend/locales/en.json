@@ -399,6 +399,8 @@
     "Placeholder": "Domain Name or IP",
     "Run": "Query",
     "invalidURL": "Invalid domain name or IP",
+    "ClearCache": "Clear Cache",
+    "CacheClearedSuccess": "Cache cleared successfully",
     "fetchError": "Unable to fetch query results or query results are empty",
     "Provider": "Information Provider"
   },

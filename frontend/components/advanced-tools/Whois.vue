@@ -31,7 +31,7 @@
                         <!-- Whois 服务器选择 -->
                         <div class="mt-3">
                             <div class="form-check form-check-inline" v-for="server in availableServers" :key="server">
-                                <input class="form-check-input" type="checkbox" :id="'server-' + server" 
+                                <input class="form-check-input" type="checkbox" :id="'server-' + server"
                                     v-model="selectedServers" :value="server" :disabled="whoisCheckStatus === 'running'">
                                 <label class="form-check-label" :for="'server-' + server">{{ server }}</label>
                             </div>
@@ -39,6 +39,13 @@
 
                         <div class="jn-placeholder">
                             <p v-if="errorMsg" class="text-danger">{{ errorMsg }}</p>
+                        </div>
+
+                        <!-- 清除缓存按钮 -->
+                        <div class="mt-2 mb-2 d-flex justify-content-end">
+                            <button class="btn btn-sm btn-outline-secondary" @click="clearWhoisCache">
+                                <i class="bi bi-trash"></i> {{ t('whois.ClearCache') || '清除缓存' }}
+                            </button>
                         </div>
 
                         <!-- Results Table -->
@@ -84,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
@@ -105,6 +112,93 @@ const type = ref('');
 const whoisResults = ref({});
 const availableServers = ref([]);
 const selectedServers = ref([]);
+
+// 缓存相关
+const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24小时，单位毫秒
+const whoisCache = reactive({
+  data: {},
+
+  // 从本地存储加载缓存
+  loadFromStorage() {
+    try {
+      const cachedData = localStorage.getItem('whoisCache');
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        this.data = parsedData;
+        // 清理过期缓存
+        this.cleanExpiredCache();
+      }
+    } catch (error) {
+      console.error('Error loading whois cache:', error);
+      this.data = {};
+      localStorage.removeItem('whoisCache');
+    }
+  },
+
+  // 保存缓存到本地存储
+  saveToStorage() {
+    try {
+      localStorage.setItem('whoisCache', JSON.stringify(this.data));
+    } catch (error) {
+      console.error('Error saving whois cache:', error);
+      // 如果存储失败（可能是存储空间已满），清理所有缓存
+      this.clearAll();
+    }
+  },
+
+  // 获取缓存数据
+  get(query, servers) {
+    const cacheKey = this.generateCacheKey(query, servers);
+    const cachedItem = this.data[cacheKey];
+
+    if (cachedItem && !this.isExpired(cachedItem.timestamp)) {
+      console.log('Using cached whois data for:', query);
+      return cachedItem.data;
+    }
+
+    return null;
+  },
+
+  // 设置缓存数据
+  set(query, servers, data) {
+    const cacheKey = this.generateCacheKey(query, servers);
+    this.data[cacheKey] = {
+      data: data,
+      timestamp: Date.now()
+    };
+    this.saveToStorage();
+  },
+
+  // 生成缓存键
+  generateCacheKey(query, servers) {
+    return `${query}_${servers.sort().join(',')}`;
+  },
+
+  // 检查缓存是否过期
+  isExpired(timestamp) {
+    return Date.now() - timestamp > CACHE_EXPIRY_TIME;
+  },
+
+  // 清理过期缓存
+  cleanExpiredCache() {
+    let hasExpired = false;
+    for (const key in this.data) {
+      if (this.isExpired(this.data[key].timestamp)) {
+        delete this.data[key];
+        hasExpired = true;
+      }
+    }
+    if (hasExpired) {
+      this.saveToStorage();
+    }
+  },
+
+  // 清除所有缓存
+  clearAll() {
+    this.data = {};
+    localStorage.removeItem('whoisCache');
+  }
+});
 
 // 获取 WHOIS 服务器列表
 const fetchWhoisServers = async () => {
@@ -135,9 +229,10 @@ const fetchWhoisServers = async () => {
     }
 };
 
-// 在组件挂载时获取服务器列表
+// 在组件挂载时获取服务器列表和加载缓存
 onMounted(() => {
     fetchWhoisServers();
+    whoisCache.loadFromStorage();
 });
 
 // 检查 URL 输入是否有效
@@ -192,9 +287,37 @@ const onSubmit = () => {
 // 获取 Whois 结果
 const getWhoisResults = async (query) => {
     whoisCheckStatus.value = 'running';
+
     try {
+        // 检查缓存中是否有数据
+        const cachedData = whoisCache.get(query, selectedServers.value);
+        if (cachedData) {
+            // 使用缓存数据
+            if (type.value === 'domain') {
+                whoisResults.value = cachedData[query];
+                providers.value = Object.keys(cachedData[query]);
+            } else {
+                whoisResults.value = cachedData;
+                providers.value = Object.keys(cachedData);
+            }
+
+            if (providers.value.length >= 1) {
+                if (isSignedIn.value && query.toLowerCase().includes('ipcheck.ing')) {
+                    checkAchievements();
+                }
+                errorMsg.value = '';
+            } else {
+                errorMsg.value = t('whois.fetchError');
+            }
+
+            whoisCheckStatus.value = 'idle';
+            return;
+        }
+
+        // 如果缓存中没有数据，则从服务器获取
         const serverParam = selectedServers.value.join(',');
         const response = await fetch(`/l-api/whois?q=${query}&servers=${serverParam}`);
+
         if (!response.ok) {
             if (response.status === 429) {
                 errorMsg.value = t('whois.rateLimit');
@@ -203,7 +326,12 @@ const getWhoisResults = async (query) => {
             }
             return;
         }
+
         const data = await response.json();
+
+        // 将获取的数据保存到缓存
+        whoisCache.set(query, selectedServers.value, data);
+
         if (type.value === 'domain') {
             // 域名查询结果处理
             whoisResults.value = data[query];
@@ -226,6 +354,7 @@ const getWhoisResults = async (query) => {
                 errorMsg.value = t('whois.fetchError');
             }
         }
+
         whoisCheckStatus.value = 'idle';
     } catch (error) {
         console.error('Error fetching Whois results:', error);
@@ -234,13 +363,17 @@ const getWhoisResults = async (query) => {
     }
 };
 
-// 获取 Whois 服务商
-const getProviders = (data) => {
-    if (type.value === 'domain') {
-        providers.value = Object.keys(data[Object.keys(data)[0]]);
-    } else {
-        providers.value = Object.keys(data);
-    }
+// 清除 Whois 缓存
+const clearWhoisCache = () => {
+    whoisCache.clearAll();
+    // 显示清除成功的消息
+    errorMsg.value = t('whois.CacheClearedSuccess') || '缓存已清除';
+    // 2秒后清除消息
+    setTimeout(() => {
+        if (errorMsg.value === (t('whois.CacheClearedSuccess') || '缓存已清除')) {
+            errorMsg.value = '';
+        }
+    }, 2000);
 };
 
 const filterDomainWhoisRawData = (text) => {

@@ -399,6 +399,8 @@
     "Placeholder": "域名或 IP",
     "Run": "查询",
     "invalidURL": "无效的域名或 IP",
+    "ClearCache": "清除缓存",
+    "CacheClearedSuccess": "缓存已成功清除",
     "fetchError": "无法获取查询结果或查询结果为空",
     "Provider": "信息服务商"
   },
