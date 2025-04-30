@@ -5,7 +5,7 @@ import { refererCheck } from '../common/referer-check.js';
 
 // 普通 DNS 服务器列表
 const dnsServers = {
-    'Google': '8.8.8.8',
+    'Google': '8.8.8.8', 
     'Cloudflare': '1.1.1.1',
     'OpenDNS': '208.67.222.222',
     'Quad9': '9.9.9.9',

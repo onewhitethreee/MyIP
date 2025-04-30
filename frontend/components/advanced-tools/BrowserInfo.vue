@@ -107,8 +107,11 @@
                                                         {{ t('browserinfo.browser.connection') }}
                                                     </span>
                                                     <span class="jn-con-title card-title mt-1">
-                                                        {{ otherInfos.cpuInfo.system.connection.effectiveType }}
-                                                        ({{ otherInfos.cpuInfo.system.connection.downlink }} Mbps)
+                                                        <div class="d-flex flex-column">
+                                                            <small>{{ otherInfos.cpuInfo.system.connection.effectiveType }}</small>
+                                                            <small class="text-muted">{{ otherInfos.cpuInfo.system.connection.downlink }} Mbps</small>
+                                                            <small class="text-muted">RTT: {{ otherInfos.cpuInfo.system.connection.rtt }}ms</small>
+                                                        </div>
                                                     </span>
                                                 </div>
                                                 <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.battery">
@@ -205,6 +208,9 @@
                                                         </div>
                                                     </span>
                                                 </div>
+                                            </div>
+
+                                            <div class="col-lg-6 col-md-6 col-12">
                                                 <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.audio">
                                                     <span>
                                                         {{ t('browserinfo.browser.audio') }}
@@ -213,6 +219,42 @@
                                                         <div class="d-flex flex-column">
                                                             <small>{{ otherInfos.cpuInfo.system.audio.sampleRate }} Hz</small>
                                                             <small class="text-muted">{{ otherInfos.cpuInfo.system.audio.channelCount }} channels</small>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.screen">
+                                                    <span>
+                                                        {{ t('browserinfo.browser.screen') }}
+                                                    </span>
+                                                    <span class="jn-con-title card-title mt-1">
+                                                        <div class="d-flex flex-column">
+                                                            <small>{{ otherInfos.cpuInfo.system.screen.width }}x{{ otherInfos.cpuInfo.system.screen.height }} ({{ otherInfos.cpuInfo.system.screen.colorDepth }} bit)</small>
+                                                            <small class="text-muted">Available: {{ otherInfos.cpuInfo.system.screen.availWidth }}x{{ otherInfos.cpuInfo.system.screen.availHeight }}</small>
+                                                            <small class="text-muted">Pixel Ratio: {{ otherInfos.cpuInfo.system.screen.devicePixelRatio }}</small>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.locale">
+                                                    <span>
+                                                        {{ t('browserinfo.browser.locale') }}
+                                                    </span>
+                                                    <span class="jn-con-title card-title mt-1">
+                                                        <div class="d-flex flex-column">
+                                                            <small>{{ otherInfos.cpuInfo.system.locale.timezone }}</small>
+                                                            <small class="text-muted">{{ otherInfos.cpuInfo.system.locale.language }}</small>
+                                                            <small class="text-muted">{{ otherInfos.cpuInfo.system.locale.languages.join(', ') }}</small>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.connection">
+                                                    <span>
+                                                        {{ t('browserinfo.browser.connection') }}
+                                                    </span>
+                                                    <span class="jn-con-title card-title mt-1">
+                                                        <div class="d-flex flex-column">
+                                                            <small>{{ otherInfos.cpuInfo.system.connection.effectiveType }}</small>
+                                                            <small class="text-muted">{{ otherInfos.cpuInfo.system.connection.downlink }} Mbps</small>
+                                                            <small class="text-muted">RTT: {{ otherInfos.cpuInfo.system.connection.rtt }}ms</small>
                                                         </div>
                                                     </span>
                                                 </div>
@@ -393,179 +435,111 @@ const getCPUInfo = async () => {
             architecture: '',
             model: '',
             features: [],
-            // 添加更多系统信息
             system: {
                 platform: navigator.platform,
                 vendor: navigator.vendor,
                 maxTouchPoints: navigator.maxTouchPoints,
                 deviceMemory: navigator.deviceMemory,
-                connection: {
-                    effectiveType: navigator.connection?.effectiveType,
-                    rtt: navigator.connection?.rtt,
-                    downlink: navigator.connection?.downlink,
-                    saveData: navigator.connection?.saveData
-                },
-                battery: null,
-                storage: null,
-                // 添加更多隐秘参数
+                connection: null,
                 webGL: null,
                 audio: null,
-                sensors: null,
-                permissions: null,
-                mediaDevices: null
+                screen: null,
+                locale: null
             }
         };
 
-        // 获取 WebGL 信息
-        try {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (gl) {
-                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                cpuInfo.system.webGL = {
-                    renderer: gl.getParameter(debugInfo ? debugInfo.UNMASKED_RENDERER_WEBGL : 37445),
-                    vendor: gl.getParameter(debugInfo ? debugInfo.UNMASKED_VENDOR_WEBGL : 37445),
-                    version: gl.getParameter(gl.VERSION),
-                    shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
-                };
-            }
-        } catch (e) {
-            console.log('WebGL not supported');
-        }
+        // 并行获取所有信息
+        await Promise.all([
+            getWebGLInfo(cpuInfo),
+            getAudioInfo(cpuInfo),
+            getScreenInfo(cpuInfo),
+            getLocaleInfo(cpuInfo),
+            getConnectionInfo(cpuInfo),
+            getCPUDetails(cpuInfo)
+        ]);
 
-        // 获取音频信息
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            cpuInfo.system.audio = {
-                sampleRate: audioContext.sampleRate,
-                channelCount: audioContext.destination.channelCount,
-                channelCountMode: audioContext.destination.channelCountMode,
-                channelInterpretation: audioContext.destination.channelInterpretation
-            };
-            audioContext.close();
-        } catch (e) {
-            console.log('Audio API not supported');
-        }
+        otherInfos.value.cpuInfo = cpuInfo;
+    } catch (error) {
+        console.error('Error getting CPU info:', error);
+        throw error;
+    }
+};
 
-        // 获取传感器信息
-        if ('accelerometer' in window) {
-            try {
-                const accelerometer = new Accelerometer({ frequency: 1 });
-                cpuInfo.system.sensors = {
-                    accelerometer: true,
-                    gyroscope: 'gyroscope' in window,
-                    magnetometer: 'magnetometer' in window,
-                    orientation: 'DeviceOrientationEvent' in window
-                };
-            } catch (e) {
-                console.log('Sensors not supported');
-            }
-        }
-
-        // 获取权限信息
-        try {
-            const permissions = await Promise.all([
-                navigator.permissions.query({ name: 'geolocation' }),
-                navigator.permissions.query({ name: 'notifications' }),
-                navigator.permissions.query({ name: 'camera' }),
-                navigator.permissions.query({ name: 'microphone' })
-            ]);
-            cpuInfo.system.permissions = {
-                geolocation: permissions[0].state,
-                notifications: permissions[1].state,
-                camera: permissions[2].state,
-                microphone: permissions[3].state
-            };
-        } catch (e) {
-            console.log('Permissions API not supported');
-        }
-
-        // 获取媒体设备信息
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            cpuInfo.system.mediaDevices = {
-                audioInput: devices.filter(d => d.kind === 'audioinput').length,
-                videoInput: devices.filter(d => d.kind === 'videoinput').length,
-                audioOutput: devices.filter(d => d.kind === 'audiooutput').length
-            };
-        } catch (e) {
-            console.log('MediaDevices API not supported');
-        }
-
-        // 获取电池信息
-        if ('getBattery' in navigator) {
-            try {
-                const battery = await navigator.getBattery();
-                cpuInfo.system.battery = {
-                    charging: battery.charging,
-                    level: battery.level * 100,
-                    chargingTime: battery.chargingTime,
-                    dischargingTime: battery.dischargingTime
-                };
-            } catch (e) {
-                console.log('Battery API not supported');
-            }
-        }
-
-        // 获取存储信息
-        if ('storage' in navigator) {
-            try {
-                const storage = await navigator.storage.estimate();
-                cpuInfo.system.storage = {
-                    quota: storage.quota,
-                    usage: storage.usage
-                };
-            } catch (e) {
-                console.log('Storage API not supported');
-            }
-        }
-
-        // 通过 Performance API 获取更多性能信息
-        if (window.performance) {
-            cpuInfo.system.performance = {
-                timing: window.performance.timing,
-                memory: window.performance.memory,
-                timeOrigin: window.performance.timeOrigin
+// 获取 WebGL 信息
+const getWebGLInfo = async (cpuInfo) => {
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            cpuInfo.system.webGL = {
+                renderer: gl.getParameter(debugInfo ? debugInfo.UNMASKED_RENDERER_WEBGL : 37445),
+                vendor: gl.getParameter(debugInfo ? debugInfo.UNMASKED_VENDOR_WEBGL : 37445),
+                version: gl.getParameter(gl.VERSION),
+                shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
             };
         }
+    } catch (e) {
+        console.log('WebGL not supported');
+    }
+};
 
-        // 获取屏幕信息
-        cpuInfo.system.screen = {
-            width: window.screen.width,
-            height: window.screen.height,
-            colorDepth: window.screen.colorDepth,
-            pixelDepth: window.screen.pixelDepth,
-            orientation: window.screen.orientation?.type,
-            // 添加更多屏幕信息
-            availWidth: window.screen.availWidth,
-            availHeight: window.screen.availHeight,
-            devicePixelRatio: window.devicePixelRatio
+// 获取音频信息
+const getAudioInfo = async (cpuInfo) => {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        cpuInfo.system.audio = {
+            sampleRate: audioContext.sampleRate,
+            channelCount: audioContext.destination.channelCount,
+            channelCountMode: audioContext.destination.channelCountMode,
+            channelInterpretation: audioContext.destination.channelInterpretation
         };
+        audioContext.close();
+    } catch (e) {
+        console.log('Audio API not supported');
+    }
+};
 
-        // 获取时区和语言信息
-        cpuInfo.system.locale = {
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            languages: navigator.languages,
-            language: navigator.language,
-            // 添加更多本地化信息
-            numberFormat: Intl.NumberFormat().resolvedOptions(),
-            dateTimeFormat: Intl.DateTimeFormat().resolvedOptions()
+// 获取屏幕信息
+const getScreenInfo = (cpuInfo) => {
+    cpuInfo.system.screen = {
+        width: window.screen.width,
+        height: window.screen.height,
+        colorDepth: window.screen.colorDepth,
+        pixelDepth: window.screen.pixelDepth,
+        orientation: window.screen.orientation?.type,
+        availWidth: window.screen.availWidth,
+        availHeight: window.screen.availHeight,
+        devicePixelRatio: window.devicePixelRatio
+    };
+};
+
+// 获取本地化信息
+const getLocaleInfo = (cpuInfo) => {
+    cpuInfo.system.locale = {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        languages: navigator.languages,
+        language: navigator.language,
+        numberFormat: Intl.NumberFormat().resolvedOptions(),
+        dateTimeFormat: Intl.DateTimeFormat().resolvedOptions()
+    };
+};
+
+// 获取网络连接信息
+const getConnectionInfo = (cpuInfo) => {
+    if (navigator.connection) {
+        cpuInfo.system.connection = {
+            effectiveType: navigator.connection.effectiveType,
+            rtt: navigator.connection.rtt,
+            downlink: navigator.connection.downlink,
+            saveData: navigator.connection.saveData
         };
+    }
+};
 
-        // 通过 WebAssembly 检测 CPU 特征
-        if (typeof WebAssembly === 'object') {
-            const wasmFeatures = [];
-            try {
-                const wasmModule = new WebAssembly.Module(new Uint8Array([0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
-                if (WebAssembly.validate(wasmModule)) {
-                    wasmFeatures.push('WebAssembly');
-                }
-            } catch (e) {
-                console.log('WebAssembly not supported');
-            }
-            cpuInfo.features = wasmFeatures;
-        }
-
+// 获取更详细的 CPU 信息
+const getCPUDetails = async (cpuInfo) => {
+    try {
         // 通过 userAgent 解析 CPU 架构
         const ua = navigator.userAgent;
         if (ua.includes('x86_64') || ua.includes('x64')) {
@@ -580,44 +554,6 @@ const getCPUInfo = async () => {
             cpuInfo.architecture = 'Unknown';
         }
 
-        // 尝试获取更详细的 CPU 信息
-        try {
-            const cpuDetails = await getCPUDetails();
-            if (cpuDetails) {
-                cpuInfo.model = cpuDetails.model;
-                cpuInfo.features = [...cpuInfo.features, ...cpuDetails.features];
-            }
-        } catch (e) {
-            console.log('Detailed CPU info not available');
-        }
-
-        otherInfos.value.cpuInfo = cpuInfo;
-    } catch (error) {
-        console.error('Error getting CPU info:', error);
-        throw error;
-    }
-};
-
-// 获取更详细的 CPU 信息
-const getCPUDetails = async () => {
-    try {
-        const cpuDetails = {
-            model: '',
-            features: []
-        };
-
-        // 通过 WebGL 获取 GPU 信息
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            if (debugInfo) {
-                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-                cpuDetails.model = `${vendor} ${renderer}`;
-            }
-        }
-
         // 检测 CPU 特征
         const features = [
             'avx', 'avx2', 'sse', 'sse2', 'sse3', 'sse4', 'sse4.1', 'sse4.2',
@@ -628,17 +564,26 @@ const getCPUDetails = async () => {
             try {
                 const module = new WebAssembly.Module(new Uint8Array([0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
                 if (WebAssembly.validate(module)) {
-                    cpuDetails.features.push(feature);
+                    cpuInfo.features.push(feature);
                 }
             } catch (e) {
                 // 特征不支持
             }
         }
 
-        return cpuDetails;
+        // 通过 WebGL 获取 GPU 信息
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                cpuInfo.model = `${vendor} ${renderer}`;
+            }
+        }
     } catch (error) {
         console.error('Error getting CPU details:', error);
-        return null;
     }
 };
 

@@ -449,7 +449,9 @@
     "fetchError": "无法获取解析结果",
     "Provider": "DNS 服务商",
     "Result": "解析结果",
-    "Record": "记录"
+    "Record": "记录",
+    "SelectServer": "选择 DNS 服务器",
+    "PleaseSelectServer": "请选择一个 DNS 服务器"
   },
   "ruletest": {
     "Title": "分流测试",

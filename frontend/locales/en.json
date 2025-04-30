@@ -447,7 +447,9 @@
     "fetchError": "Unable to fetch resolution results",
     "Provider": "DNS Provider",
     "Result": "Resolution Result",
-    "Record": "Record"
+    "Record": "Record",
+    "SelectServer": "Select DNS Server",
+    "PleaseSelectServer": "Please select a DNS server"
   },
   "ruletest": {
     "Title": "Rule Test",
