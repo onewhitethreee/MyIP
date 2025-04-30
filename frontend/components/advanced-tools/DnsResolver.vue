@@ -39,11 +39,11 @@
                             </button>
                         </div>
 
-                        <!-- DNS服务器选择 - 改为单选按钮 -->
+                        <!-- DNS服务器选择 - 单选按钮 -->
                         <div class="server-selection mt-3 mb-2">
                             <label class="form-label">{{ t('dnsresolver.SelectServer') }}:</label>
                             <div class="btn-group server-radio-group" role="group">
-                                <template v-for="server in dnsServers" :key="server">
+                                <div v-for="server in dnsServers" :key="server" class="d-inline">
                                     <input type="radio" class="btn-check" :id="`server-${server}`" name="server-options"
                                         :value="server" v-model="selectedServer"
                                         :disabled="dnsCheckStatus === 'running'">
@@ -51,7 +51,7 @@
                                         :class="{ active: selectedServer === server }" :for="`server-${server}`">
                                         {{ server }}
                                     </label>
-                                </template>
+                                </div>
                             </div>
                         </div>
 
@@ -72,8 +72,18 @@
                                     <tbody>
                                         <tr v-for="(result, index) in combinedResults" :key="index">
                                             <td>{{ result.provider }}</td>
-                                            <td :class="[result.address === 'N/A' ? 'opacity-50' : '']">
-                                                {{ result.address }}</td>
+                                            <td>
+                                                <div
+                                                    v-if="Array.isArray(result.addresses) && result.addresses.length > 0">
+                                                    <div v-for="(address, addrIndex) in result.addresses"
+                                                        :key="addrIndex" :class="{ 'opacity-50': address === 'N/A' }">
+                                                        {{ address }}
+                                                    </div>
+                                                </div>
+                                                <div v-else :class="{ 'opacity-50': result.addresses === 'N/A' }">
+                                                    {{ result.addresses }}
+                                                </div>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -184,11 +194,16 @@ const getDNSResults = async (hostname, type, server) => {
     }
 };
 
+// 修改处理结果函数以支持多条记录
 const processResults = (data) => {
     const processEntries = (entries, type) => entries.map(entry => {
         const provider = Object.keys(entry)[0];
-        const address = Array.isArray(entry[provider]) ? entry[provider].join(', ') : entry[provider];
-        return { provider: `${provider} (${type})`, address };
+        const addresses = entry[provider];
+
+        return {
+            provider: `${provider} (${type})`,
+            addresses: addresses
+        };
     });
 
     if (data.result_dns) {
