@@ -260,7 +260,8 @@
       "timezoneRawOffset": "时区原始偏移",
       "timezoneDstOffset": "时区夏令时偏移",
       "screen": "屏幕",
-      "screenWidth": "屏幕宽度"
+      "screenWidth": "屏幕宽度",
+      "deviceMemory": "设备内存"
     },
     "fingerprint": {
       "Infos": "指纹信息",
