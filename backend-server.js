@@ -15,7 +15,7 @@ import ipCheckingHandler from './api/ipcheck-ing.js';
 import ipapiisHandler from './api/ipapi-is.js';
 import ip2locationHandler from './api/ip2location-io.js';
 import ipsbHandler from './api/ip-sb.js';
-import maxmindHandler from './api/maxmind.js';
+// import maxmindHandler from './api/maxmind.js';
 // Others
 import cfHander from './api/cf-radar.js';
 // import dnsResolver from './api/dns-resolver.js';
@@ -146,7 +146,7 @@ app.get('/api/ipapiis', ipapiisHandler);
 app.get('/api/ip2location', ip2locationHandler);
 app.get('/api/invisibility', invisibilitytestHandler);
 // app.get('/api/macchecker', macChecker);
-app.get('/api/maxmind', maxmindHandler);
+// app.get('/api/maxmind', maxmindHandler);
 app.get('/api/getuserinfo', getUserinfo);
 app.put('/api/updateuserachievement', updateUserAchievement);
 
