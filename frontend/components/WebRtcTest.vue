@@ -33,7 +33,6 @@
                 :class="[stun.ip === t('webrtc.StatusWait') ? 'bi-hourglass-split' : 'bi-pc-display-horizontal']">&nbsp;</i>
               <span :class="{ 'jn-ip-font': stun.ip.length > 32 }"> {{ stun.ip }}
               </span>
-
             </p>
             <div v-if="stun.natType" class="alert d-flex flex-column" :class="{
               'alert-info': stun.natType === t('webrtc.StatusWait'),
@@ -42,19 +41,24 @@
               <span>
                 <i class="bi"
                   :class="[stun.natType === t('webrtc.StatusWait') ? 'bi-hourglass-split' : ' bi-controller']"></i> NAT:
-                {{
-                stun.natType }}
+                {{ stun.natType }}
               </span>
 
-              <span class="mt-2">
-                <i class="bi"
-                  :class="[stun.country === t('webrtc.StatusWait') || stun.country === t('webrtc.StatusError') ? 'bi-hourglass-split' : 'bi-geo-alt-fill']"></i>
-                {{ t('ipInfos.Country') }}: <span :class="[ stun.country !== t('webrtc.StatusWait') ? 'fw-bold':'']">{{
-                  stun.country }}&nbsp;</span>
-                <span v-show="stun.country_code" :class="'jn-fl fi fi-' + stun.country_code"></span>
-              </span>
-
-
+              <div class="mt-2">
+                <div class="d-flex align-items-center mb-1">
+                  <i class="bi bi-geo-alt-fill me-2"></i>
+                  <span class="text-break">{{ stun.city }}{{ stun.region ? ', ' + stun.region : '' }}</span>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <i class="bi bi-flag-fill me-2"></i>
+                  <span class="text-break">{{ stun.country_name }}</span>
+                  <span v-show="stun.country_code" :class="['jn-fl', 'fi', 'fi-' + stun.country_code.toLowerCase(), 'ms-2']"></span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-building me-2"></i>
+                  <span class="text-break">{{ stun.org }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -91,8 +95,12 @@ const stunServers = reactive([
     url: "stun.l.google.com:19302",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "blackberry",
@@ -100,8 +108,12 @@ const stunServers = reactive([
     url: "stun.voip.blackberry.com:3478",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "twilio",
@@ -109,8 +121,12 @@ const stunServers = reactive([
     url: "global.stun.twilio.com",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "cloudflare",
@@ -118,8 +134,12 @@ const stunServers = reactive([
     url: "stun.cloudflare.com",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "microsoft",
@@ -127,8 +147,12 @@ const stunServers = reactive([
     url: "stun.sipgate.net:3478",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "amazon",
@@ -136,8 +160,12 @@ const stunServers = reactive([
     url: "stun.kinesisvideo.us-east-1.amazonaws.com:443",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "xiaomi",
@@ -145,8 +173,12 @@ const stunServers = reactive([
     url: "stun.miwifi.com:3478",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   },
   {
     id: "nextCloud",
@@ -154,10 +186,13 @@ const stunServers = reactive([
     url: "stun.nextcloud.com:3478",
     ip: t('webrtc.StatusWait'),
     natType: t('webrtc.StatusWait'),
+    city: t('webrtc.StatusWait'),
+    region: t('webrtc.StatusWait'),
     country: t('webrtc.StatusWait'),
+    country_name: t('webrtc.StatusWait'),
     country_code: '',
+    org: t('webrtc.StatusWait'),
   }
-  
 ]);
 
 
@@ -179,8 +214,11 @@ const checkSTUNServer = async (stun) => {
             stun.ip = ipMatch[0];
             try {
               let countryInfo = await fetchCountryCode(stun.ip);
-              stun.country_code = countryInfo[0];
-              stun.country = countryInfo[1];
+              stun.country_code = countryInfo.country_code;
+              stun.country_name = countryInfo.country_name;
+              stun.city = countryInfo.city;
+              stun.region = countryInfo.region;
+              stun.org = countryInfo.org;
             } catch (error) {
               console.error("Error fetching country code:", error);
               reject(error);
@@ -238,24 +276,29 @@ const fetchCountryCode = async (ip) => {
   if (setLang === 'zh') {
     setLang = 'zh-CN';
   }
-  const source = store.ipDBs.find(source => source.text === "MaxMind");
 
   try {
-    const url = store.getDbUrl(source.id, ip, setLang);
-    const response = await fetch(url);
+    const response = await fetch(`/l-api/geoIp?ip=${ip}&lang=${setLang}`);
     const data = await response.json();
-    const ipData = transformDataFromIPapi(data, source.id, t, lang.value);
-
-    if (ipData) {
-      let country_code = ipData.country_code.toLowerCase();
-      let country = ipData.country_code || 'N/A';
-      if (country !== 'N/A') {
-        country = getCountryName(ipData.country_code, lang.value); 
-      }
-      return [country_code, country];
+    
+    if (data) {
+      return {
+        country_code: data.country_code?.toLowerCase() || '',
+        country_name: data.country_name || 'N/A',
+        city: data.city || 'N/A',
+        region: data.region || 'N/A',
+        org: data.org || 'N/A'
+      };
     }
   } catch (error) {
     console.error("Error fetching IP country code", error);
+    return {
+      country_code: '',
+      country_name: t('webrtc.StatusError'),
+      city: t('webrtc.StatusError'),
+      region: t('webrtc.StatusError'),
+      org: t('webrtc.StatusError')
+    };
   }
 }
 
