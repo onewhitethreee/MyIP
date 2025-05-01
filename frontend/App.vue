@@ -1,28 +1,30 @@
 <template>
-  <NavBar ref="navBarRef" />
-  <User ref="userRef" />
-  <Achievements ref="achievementsRef" />
-  <Preferences ref="preferencesRef" />
-  <Alert />
-  <div id="mainpart" class="container mt-5 jn-container">
-    <div data-bs-spy="scroll" data-bs-target="#navbar-top" data-bs-root-margin="0px 0px -40%"
-      data-bs-smooth-scroll="true" class="rounded-2" tabindex="0">
-      <IPCheck ref="IPCheckRef" />
-      <Connectivity ref="connectivityRef" />
-      <WebRTC ref="webRTCRef" />
-      <DNSLeaks ref="dnsLeaksRef" />
-      <SpeedTest ref="speedTestRef" />
-      <AdvancedTools ref="advancedToolsRef" />
+  <div>
+    <NavBar ref="navBarRef" />
+    <User ref="userRef" />
+    <Achievements ref="achievementsRef" />
+    <Preferences ref="preferencesRef" />
+    <Alert />
+    <div id="mainpart" class="container mt-5 jn-container">
+      <div data-bs-spy="scroll" data-bs-target="#navbar-top" data-bs-root-margin="0px 0px -40%"
+        data-bs-smooth-scroll="true" class="rounded-2" tabindex="0">
+        <IPCheck ref="IPCheckRef" />
+        <Connectivity ref="connectivityRef" />
+        <WebRTC ref="webRTCRef" />
+        <DNSLeaks ref="dnsLeaksRef" />
+        <SpeedTest ref="speedTestRef" />
+        <AdvancedTools ref="advancedToolsRef" />
+      </div>
     </div>
+    <InfoMask :showMaskButton="showMaskButton" :infoMaskLevel="infoMaskLevel"
+      :toggleInfoMask="toggleInfoMask" />
+    <QueryIP ref="queryIPRef" />
+    <HelpModal ref="helpModalRef" />
+    <Additional ref="additionalRef" />
+    <Footer ref="footerRef" />
+    <PWA />
+    <Patch />
   </div>
-  <InfoMask :showMaskButton="showMaskButton" :infoMaskLevel="infoMaskLevel"
-    :toggleInfoMask="toggleInfoMask" />
-  <QueryIP ref="queryIPRef" />
-  <HelpModal ref="helpModalRef" />
-  <Additional ref="additionalRef" />
-  <Footer ref="footerRef" />
-  <PWA />
-  <Patch />
 </template>
 
 <script setup>
