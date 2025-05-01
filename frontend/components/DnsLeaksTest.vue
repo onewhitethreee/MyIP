@@ -1,59 +1,73 @@
 <template>
   <!-- DNS Leaks Test -->
   <div class="dnsleak-test-section mb-4">
-    <div class="jn-title2">
+    <div class="jn-title2 d-flex justify-content-between align-items-center">
       <h2 id="DNSLeakTest" :class="{ 'mobile-h2': isMobile }">🛑 {{ t('dnsleaktest.Title') }}</h2>
-      <button @click="checkAllDNSLeakTest(true)"
-        :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh DNS Leak Test"
-        v-tooltip="t('Tooltips.RefreshDNSLeakTest')"><i class="bi"
-          :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i></button>
+      <div class="d-flex align-items-center">
+        <button 
+          @click="toggleVisibility" 
+          class="btn btn-sm me-2"
+          :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+          v-tooltip="{ title: isVisible ? t('dnsleaktest.Hide') : t('dnsleaktest.Show'), placement: 'top' }"
+        >
+          <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+        </button>
+        <button @click="checkAllDNSLeakTest(true)"
+          :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh DNS Leak Test"
+          v-tooltip="t('Tooltips.RefreshDNSLeakTest')"><i class="bi"
+            :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i></button>
+      </div>
     </div>
-    <div class="text-secondary">
-      <p>{{ t('dnsleaktest.Note') }}</p>
-      <p>{{ t('dnsleaktest.Note2') }}</p>
-    </div>
-    <div class="row">
-      <div v-for="(leak, index) in leakTest" :key="leak.id" class="col-lg-3 col-md-6 col-12 mb-4">
-        <div class="card jn-card keyboard-shortcut-card"
-          :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
-          <div class="card-body">
-            <p class="jn-con-title card-title"><i class="bi bi-heart-pulse-fill"></i> {{ leak.name }}
-              <i class="bi" :class="'bi-' + (index + 1) + '-square'"></i>&nbsp;
-            </p>
-            <p class="card-text" :class="{
-              'text-info': leak.ip === t('dnsleaktest.StatusWait') || leak.ip === t('dnsleaktest.StatusError'),
-              'text-success': leak.ip.includes('.') || leak.ip.includes(':'),
-            }">
-              <i class="bi"
-                :class="[leak.ip === t('dnsleaktest.StatusWait') || leak.ip === t('dnsleaktest.StatusError') ? 'bi-hourglass-split' : 'bi-box-arrow-right']"></i>
-              {{ t('dnsleaktest.Endpoint') }}: {{
-              leak.ip }}
-            </p>
+    <Transition name="slide-fade">
+      <div v-if="isVisible">
+        <div class="text-secondary">
+          <p>{{ t('dnsleaktest.Note') }}</p>
+          <p>{{ t('dnsleaktest.Note2') }}</p>
+        </div>
+        <div class="row">
+          <div v-for="(leak, index) in leakTest" :key="leak.id" class="col-lg-3 col-md-6 col-12 mb-4">
+            <div class="card jn-card keyboard-shortcut-card"
+              :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
+              <div class="card-body">
+                <p class="jn-con-title card-title"><i class="bi bi-heart-pulse-fill"></i> {{ leak.name }}
+                  <i class="bi" :class="'bi-' + (index + 1) + '-square'"></i>&nbsp;
+                </p>
+                <p class="card-text" :class="{
+                  'text-info': leak.ip === t('dnsleaktest.StatusWait') || leak.ip === t('dnsleaktest.StatusError'),
+                  'text-success': leak.ip.includes('.') || leak.ip.includes(':'),
+                }">
+                  <i class="bi"
+                    :class="[leak.ip === t('dnsleaktest.StatusWait') || leak.ip === t('dnsleaktest.StatusError') ? 'bi-hourglass-split' : 'bi-box-arrow-right']"></i>
+                  {{ t('dnsleaktest.Endpoint') }}: {{
+                  leak.ip }}
+                </p>
 
-            <div class="alert d-flex flex-column" :class="{
-              'alert-info': leak.country === t('dnsleaktest.StatusWait'),
-              'alert-success': leak.country !== t('dnsleaktest.StatusWait'),
-            }" :data-bs-theme="isDarkMode ? 'dark' : ''">
+                <div class="alert d-flex flex-column" :class="{
+                  'alert-info': leak.country === t('dnsleaktest.StatusWait'),
+                  'alert-success': leak.country !== t('dnsleaktest.StatusWait'),
+                }" :data-bs-theme="isDarkMode ? 'dark' : ''">
 
-              <span class="jn-org">
-                <i class="bi"
-                  :class="[leak.org === t('dnsleaktest.StatusWait') || leak.org === t('dnsleaktest.StatusError') ? 'bi-hourglass-split' : 'bi-geo-alt-fill']"></i>
-                {{ t('ipInfos.ISP') }}: <span :title="leak.org">{{ leak.org }}</span>
-              </span>
+                  <span class="jn-org">
+                    <i class="bi"
+                      :class="[leak.org === t('dnsleaktest.StatusWait') || leak.org === t('dnsleaktest.StatusError') ? 'bi-hourglass-split' : 'bi-geo-alt-fill']"></i>
+                    {{ t('ipInfos.ISP') }}: <span :title="leak.org">{{ leak.org }}</span>
+                  </span>
 
-              <span class="mt-2">
-                <i class="bi"
-                  :class="[leak.ip === t('dnsleaktest.StatusWait') || leak.ip === t('dnsleaktest.StatusError') ? 'bi-hourglass-split' : 'bi-geo-alt-fill']"></i>
-                {{ t('ipInfos.Country') }}: <span
-                  :class="[ leak.country !== t('dnsleaktest.StatusWait') ? 'fw-bold':'']">{{ leak.country
-                  }}&nbsp;</span>
-                <span v-show="leak.country_code" :class="'jn-fl fi fi-' + leak.country_code.toLowerCase()"></span>
-              </span>
+                  <span class="mt-2">
+                    <i class="bi"
+                      :class="[leak.ip === t('dnsleaktest.StatusWait') || leak.ip === t('dnsleaktest.StatusError') ? 'bi-hourglass-split' : 'bi-geo-alt-fill']"></i>
+                    {{ t('ipInfos.Country') }}: <span
+                      :class="[ leak.country !== t('dnsleaktest.StatusWait') ? 'fw-bold':'']">{{ leak.country
+                      }}&nbsp;</span>
+                    <span v-show="leak.country_code" :class="'jn-fl fi fi-' + leak.country_code.toLowerCase()"></span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -91,6 +105,14 @@ const leakTest = reactive([
 ]);
 
 const isStarted = ref(false);
+
+// 添加显示/隐藏状态
+const isVisible = ref(true);
+
+// 添加切换可见性的方法
+const toggleVisibility = () => {
+  isVisible.value = !isVisible.value;
+};
 
 // 生成 32 位随机字符串
 const generate32DigitString = () => {
@@ -242,5 +264,38 @@ defineExpose({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 添加按钮样式 */
+.btn-outline-dark,
+.btn-outline-light {
+  padding: 0.25rem 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-dark:hover,
+.btn-outline-light:hover {
+  transform: scale(1.1);
+}
+
+/* 调整标题样式 */
+.jn-title2 {
+  margin-bottom: 1rem;
+}
+
+/* 添加动画样式 */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
 }
 </style>

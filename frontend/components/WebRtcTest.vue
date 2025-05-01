@@ -2,69 +2,83 @@
   <div>
     <!-- WebRTC Test -->
     <div class="webrtc-test-section mb-4">
-      <div class="jn-title2">
+      <div class="jn-title2 d-flex justify-content-between align-items-center">
         <h2 id="WebRTC" :class="{ 'mobile-h2': isMobile }">🚥 {{ t('webrtc.Title') }}</h2>
-        <button @click="checkAllWebRTC(true)" :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']"
-          aria-label="Refresh WebRTC Test" v-tooltip="t('Tooltips.RefreshWebRTC')">
-          <i class="bi" :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
-        </button>
+        <div class="d-flex align-items-center">
+          <button 
+            @click="toggleVisibility" 
+            class="btn btn-sm me-2"
+            :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+            v-tooltip="{ title: isVisible ? t('webrtc.Hide') : t('webrtc.Show'), placement: 'top' }"
+          >
+            <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+          </button>
+          <button @click="checkAllWebRTC(true)" :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']"
+            aria-label="Refresh WebRTC Test" v-tooltip="t('Tooltips.RefreshWebRTC')">
+            <i class="bi" :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
+          </button>
+        </div>
       </div>
-      <div class="text-secondary">
-        <p>{{ t('webrtc.Note') }}</p>
-      </div>
-      <div v-if="isIPLeaked" class="alert alert-warning mb-3" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {{ t('webrtc.IPLeakWarning') }}
-      </div>
-      <div class="row">
-        <div v-for="(stun, index) in stunServers" :key="stun.id" class="col-lg-3 col-md-6 col-12 mb-4"
-          :class="{ 'd-none': index >= webrtcServerCount }">
-          <div class="card jn-card keyboard-shortcut-card"
-            :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
-            <div class="card-body">
-              <p class="card-title jn-con-title"><i class="bi bi-sign-merge-left-fill"></i> {{ stun.name }}</p>
-              <p class="card-text text-secondary" style="font-size: 10pt;"><i class="bi bi-hdd-network-fill"></i> {{
-                stun.url }}</p>
-              <p class="card-text" :class="{
-                'text-info': stun.ip === t('webrtc.StatusWait'),
-                'text-success': stun.ip.includes('.') || stun.ip.includes(':'),
-                'text-danger': stun.ip === t('webrtc.StatusError')
-              }">
-                <i class="bi"
-                  :class="[stun.ip === t('webrtc.StatusWait') ? 'bi-hourglass-split' : 'bi-pc-display-horizontal']">&nbsp;</i>
-                <span :class="{ 'jn-ip-font': stun.ip.length > 32 }"> {{ stun.ip }}
-                </span>
-              </p>
-              <div v-if="stun.natType" class="alert d-flex flex-column" :class="{
-                'alert-info': stun.natType === t('webrtc.StatusWait'),
-                'alert-success': stun.natType !== t('webrtc.StatusWait'),
-              }" :data-bs-theme="isDarkMode ? 'dark' : ''">
-                <span>
-                  <i class="bi"
-                    :class="[stun.natType === t('webrtc.StatusWait') ? 'bi-hourglass-split' : ' bi-controller']"></i> NAT:
-                  {{ stun.natType }}
-                </span>
+      <Transition name="slide-fade">
+        <div v-if="isVisible">
+          <div class="text-secondary">
+            <p>{{ t('webrtc.Note') }}</p>
+          </div>
+          <div v-if="isIPLeaked" class="alert alert-warning mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ t('webrtc.IPLeakWarning') }}
+          </div>
+          <div class="row">
+            <div v-for="(stun, index) in stunServers" :key="stun.id" class="col-lg-3 col-md-6 col-12 mb-4"
+              :class="{ 'd-none': index >= webrtcServerCount }">
+              <div class="card jn-card keyboard-shortcut-card"
+                :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
+                <div class="card-body">
+                  <p class="card-title jn-con-title"><i class="bi bi-sign-merge-left-fill"></i> {{ stun.name }}</p>
+                  <p class="card-text text-secondary" style="font-size: 10pt;"><i class="bi bi-hdd-network-fill"></i> {{
+                    stun.url }}</p>
+                  <p class="card-text" :class="{
+                    'text-info': stun.ip === t('webrtc.StatusWait'),
+                    'text-success': stun.ip.includes('.') || stun.ip.includes(':'),
+                    'text-danger': stun.ip === t('webrtc.StatusError')
+                  }">
+                    <i class="bi"
+                      :class="[stun.ip === t('webrtc.StatusWait') ? 'bi-hourglass-split' : 'bi-pc-display-horizontal']">&nbsp;</i>
+                    <span :class="{ 'jn-ip-font': stun.ip.length > 32 }"> {{ stun.ip }}
+                    </span>
+                  </p>
+                  <div v-if="stun.natType" class="alert d-flex flex-column" :class="{
+                    'alert-info': stun.natType === t('webrtc.StatusWait'),
+                    'alert-success': stun.natType !== t('webrtc.StatusWait'),
+                  }" :data-bs-theme="isDarkMode ? 'dark' : ''">
+                    <span>
+                      <i class="bi"
+                        :class="[stun.natType === t('webrtc.StatusWait') ? 'bi-hourglass-split' : ' bi-controller']"></i> NAT:
+                      {{ stun.natType }}
+                    </span>
 
-                <div class="mt-2">
-                  <div class="d-flex align-items-center mb-1 location-clickable" @click.stop="showLocation(stun)" v-tooltip="t('Tooltips.ShowOnMap')">
-                    <i class="bi bi-geo-alt-fill me-2"></i>
-                    <span class="text-break">{{ stun.city }}{{ stun.region ? ', ' + stun.region : '' }}</span>
-                  </div>
-                  <div class="d-flex align-items-center mb-1">
-                    <i class="bi bi-flag-fill me-2"></i>
-                    <span class="text-break">{{ stun.country_name }}</span>
-                    <span v-show="stun.country_code" :class="['jn-fl', 'fi', 'fi-' + stun.country_code.toLowerCase(), 'ms-2']"></span>
-                  </div>
-                  <div class="d-flex align-items-center">
-                    <i class="bi bi-building me-2"></i>
-                    <span class="text-break">{{ stun.org }}</span>
+                    <div class="mt-2">
+                      <div class="d-flex align-items-center mb-1 location-clickable" @click.stop="showLocation(stun)" v-tooltip="t('Tooltips.ShowOnMap')">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        <span class="text-break">{{ stun.city }}{{ stun.region ? ', ' + stun.region : '' }}</span>
+                      </div>
+                      <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-flag-fill me-2"></i>
+                        <span class="text-break">{{ stun.country_name }}</span>
+                        <span v-show="stun.country_code" :class="['jn-fl', 'fi', 'fi-' + stun.country_code.toLowerCase(), 'ms-2']"></span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-building me-2"></i>
+                        <span class="text-break">{{ stun.org }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </Transition>
     </div>
     <MapModal ref="mapModal" :location="currentLocation" />
   </div>
@@ -207,6 +221,14 @@ const currentLocation = ref({
   country: '',
   organization: ''
 });
+
+// 添加显示/隐藏状态
+const isVisible = ref(true);
+
+// 添加切换可见性的方法
+const toggleVisibility = () => {
+  isVisible.value = !isVisible.value;
+};
 
 // 测试 STUN 服务器
 const checkSTUNServer = async (stun) => {
@@ -414,5 +436,36 @@ defineExpose({
   transform: scale(1.1);
 }
 
+/* 添加按钮样式 */
+.btn-outline-dark,
+.btn-outline-light {
+  padding: 0.25rem 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
 
+.btn-outline-dark:hover,
+.btn-outline-light:hover {
+  transform: scale(1.1);
+}
+
+/* 调整标题样式 */
+.jn-title2 {
+  margin-bottom: 1rem;
+}
+
+/* 添加动画样式 */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
 </style>

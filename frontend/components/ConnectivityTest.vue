@@ -1,47 +1,61 @@
 <template>
   <!-- Connectivity -->
   <div class="availability-test-section mb-4">
-    <div class="jn-title2">
+    <div class="jn-title2 d-flex justify-content-between align-items-center">
       <h2 id="Connectivity" :class="{ 'mobile-h2': isMobile }">🚦 {{ t('connectivity.Title') }}</h2>
-      <button @click="checkAllConnectivity(false, true, true)"
-        :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh Connectivity Test"
-        v-tooltip="t('Tooltips.RefreshConnectivityTests')"><i class="bi"
-          :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i></button>
+      <div class="d-flex align-items-center">
+        <button 
+          @click="toggleVisibility" 
+          class="btn btn-sm me-2"
+          :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+          v-tooltip="{ title: isVisible ? t('connectivity.Hide') : t('connectivity.Show'), placement: 'top' }"
+        >
+          <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+        </button>
+        <button @click="checkAllConnectivity(false, true, true)"
+          :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh Connectivity Test"
+          v-tooltip="t('Tooltips.RefreshConnectivityTests')"><i class="bi"
+            :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i></button>
+      </div>
     </div>
-    <div class="text-secondary">
-      <p>{{ t('connectivity.Note') }}</p>
-    </div>
-    <div class="row">
-      <div v-for="test in connectivityTests" :key="test.id" class="col-6 col-md-3 mb-4">
-        <div class="card jn-card keyboard-shortcut-card"
-          :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
-          <div class="card-body">
-            <p class="jn-con-title card-title" @click.prevent="checkConnectivityHandler(test, onTestComplete, true)"
-              :title="t('connectivity.RefreshThisTest')"><i class="bi" :class="'bi-' + test.icon"></i> {{ test.name }}
-            </p>
-            <p class="card-text" :class="{
-                'text-info': test.status === t('connectivity.StatusWait'),
-                'text-success': test.status.includes(t('connectivity.StatusAvailable')) && test.time < 200,
-                'jn-text-warning': test.status.includes(t('connectivity.StatusAvailable')) && test.time >= 200,
-                'text-danger': test.status === t('connectivity.StatusUnavailable') || test.status === t('connectivity.StatusTimeout')
-              }" :title="t('connectivity.minTestTime') + test.mintime + ' ms'">
-              <i v-if="test.status === t('connectivity.StatusUnavailable') || test.status === t('connectivity.StatusTimeout')"
-                class="bi bi-emoji-frown"></i>
-              <i v-else-if="test.status === t('connectivity.StatusAvailable') && test.time < 200"
-                class="bi bi-emoji-smile"></i>
-              <i v-else-if="test.status === t('connectivity.StatusAvailable') && test.time >= 200"
-                class="bi bi-emoji-expressionless"></i>
-              <i v-else-if="test.time === 0" class="bi bi-hourglass-split"></i>
-              {{ test.status }}
-              <span v-if="test.time !== 0">
-                : {{ test.time }}
-                <span> ms</span>
-              </span>
-            </p>
+    <Transition name="slide-fade">
+      <div v-if="isVisible">
+        <div class="text-secondary">
+          <p>{{ t('connectivity.Note') }}</p>
+        </div>
+        <div class="row">
+          <div v-for="test in connectivityTests" :key="test.id" class="col-6 col-md-3 mb-4">
+            <div class="card jn-card keyboard-shortcut-card"
+              :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
+              <div class="card-body">
+                <p class="jn-con-title card-title" @click.prevent="checkConnectivityHandler(test, onTestComplete, true)"
+                  :title="t('connectivity.RefreshThisTest')"><i class="bi" :class="'bi-' + test.icon"></i> {{ test.name }}
+                </p>
+                <p class="card-text" :class="{
+                    'text-info': test.status === t('connectivity.StatusWait'),
+                    'text-success': test.status.includes(t('connectivity.StatusAvailable')) && test.time < 200,
+                    'jn-text-warning': test.status.includes(t('connectivity.StatusAvailable')) && test.time >= 200,
+                    'text-danger': test.status === t('connectivity.StatusUnavailable') || test.status === t('connectivity.StatusTimeout')
+                  }" :title="t('connectivity.minTestTime') + test.mintime + ' ms'">
+                  <i v-if="test.status === t('connectivity.StatusUnavailable') || test.status === t('connectivity.StatusTimeout')"
+                    class="bi bi-emoji-frown"></i>
+                  <i v-else-if="test.status === t('connectivity.StatusAvailable') && test.time < 200"
+                    class="bi bi-emoji-smile"></i>
+                  <i v-else-if="test.status === t('connectivity.StatusAvailable') && test.time >= 200"
+                    class="bi bi-emoji-expressionless"></i>
+                  <i v-else-if="test.time === 0" class="bi bi-hourglass-split"></i>
+                  {{ test.status }}
+                  <span v-if="test.time !== 0">
+                    : {{ test.time }}
+                    <span> ms</span>
+                  </span>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -145,6 +159,14 @@ const connectivityTests = reactive([
     mintime: 0,
   },
 ]);
+
+// 添加显示/隐藏状态
+const isVisible = ref(true);
+
+// 添加切换可见性的方法
+const toggleVisibility = () => {
+  isVisible.value = !isVisible.value;
+};
 
 // 检查网络连通性
 const checkConnectivityHandler = (test, onTestComplete = () => { }, isManualRun) => {
@@ -301,5 +323,38 @@ defineExpose({
 <style scoped>
 .jn-text-warning {
   color: #c67c14;
+}
+
+/* 添加按钮样式 */
+.btn-outline-dark,
+.btn-outline-light {
+  padding: 0.25rem 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-dark:hover,
+.btn-outline-light:hover {
+  transform: scale(1.1);
+}
+
+/* 调整标题样式 */
+.jn-title2 {
+  margin-bottom: 1rem;
+}
+
+/* 添加动画样式 */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
 }
 </style>
