@@ -394,7 +394,9 @@
     "InvisibilityTest": "猜猜看我是否知道你挂了代理",
     "MacChecker": "查询物理地址的归属信息",
     "BrowserInfo": "检阅浏览器信息和指纹",
-    "SecurityChecklist": "全面的数字生活安全检查清单"
+    "SecurityChecklist": "全面的数字生活安全检查清单",
+    "Hide": "隐藏",
+    "Show": "显示"
   },
   "macchecker": {
     "Title": "MAC 地址查询",
@@ -542,7 +544,9 @@
     "StatusTimeout": "超时或不可用",
     "checking": "检查中...",
     "minTestTime": "最小测试时间：",
-    "RefreshThisTest": "刷新此测试"
+    "RefreshThisTest": "刷新此测试",
+    "Hide": "隐藏",
+    "Show": "显示"
   },
   "webrtc": {
     "id": "webrtc",
@@ -557,7 +561,9 @@
       "relay": "对称型",
       "host": "全锥型",
       "unknown": "未知类型"
-    }
+    },
+    "Hide": "隐藏",
+    "Show": "显示"
   },
   "dnsleaktest": {
     "id": "dnsleaktest",
@@ -568,7 +574,9 @@
     "Endpoint": "DNS 出口",
     "EndpointCountry": "出口地区",
     "StatusWait": "待检测",
-    "StatusError": "测试出错"
+    "StatusError": "测试出错",
+    "Hide": "隐藏",
+    "Show": "显示"
   },
   "speedtest": {
     "id": "speedtest",
@@ -593,7 +601,9 @@
       "Good": "优秀",
       "Medium": "中等",
       "Bad": "较差"
-    }
+    },
+    "Hide": "隐藏",
+    "Show": "显示"
   },
   "pingtest": {
     "id": "pingtest",

@@ -3,26 +3,27 @@
   <div class="dnsleak-test-section mb-4">
     <div class="jn-title2 d-flex justify-content-between align-items-center">
       <h2 id="DNSLeakTest" :class="{ 'mobile-h2': isMobile }">🛑 {{ t('dnsleaktest.Title') }}</h2>
-      <div class="d-flex align-items-center">
-        <button 
-          @click="toggleVisibility" 
-          class="btn btn-sm me-2"
-          :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
-          v-tooltip="{ title: isVisible ? t('dnsleaktest.Hide') : t('dnsleaktest.Show'), placement: 'top' }"
-        >
-          <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
-        </button>
-        <button @click="checkAllDNSLeakTest(true)"
-          :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh DNS Leak Test"
-          v-tooltip="t('Tooltips.RefreshDNSLeakTest')"><i class="bi"
-            :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i></button>
-      </div>
+      <button 
+        @click="toggleVisibility" 
+        class="btn btn-sm"
+        :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+        v-tooltip="{ title: isVisible ? t('dnsleaktest.Hide') : t('dnsleaktest.Show'), placement: 'top' }"
+      >
+        <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+      </button>
     </div>
     <Transition name="slide-fade">
       <div v-if="isVisible">
-        <div class="text-secondary">
-          <p>{{ t('dnsleaktest.Note') }}</p>
-          <p>{{ t('dnsleaktest.Note2') }}</p>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="text-secondary">
+            <p>{{ t('dnsleaktest.Note') }}</p>
+            <p>{{ t('dnsleaktest.Note2') }}</p>
+          </div>
+          <button @click="checkAllDNSLeakTest(true)"
+            :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh DNS Leak Test"
+            v-tooltip="t('Tooltips.RefreshDNSLeakTest')">
+            <i class="bi" :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
+          </button>
         </div>
         <div class="row">
           <div v-for="(leak, index) in leakTest" :key="leak.id" class="col-lg-3 col-md-6 col-12 mb-4">

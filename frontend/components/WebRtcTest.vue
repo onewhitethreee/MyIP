@@ -4,25 +4,25 @@
     <div class="webrtc-test-section mb-4">
       <div class="jn-title2 d-flex justify-content-between align-items-center">
         <h2 id="WebRTC" :class="{ 'mobile-h2': isMobile }">🚥 {{ t('webrtc.Title') }}</h2>
-        <div class="d-flex align-items-center">
-          <button 
-            @click="toggleVisibility" 
-            class="btn btn-sm me-2"
-            :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
-            v-tooltip="{ title: isVisible ? t('webrtc.Hide') : t('webrtc.Show'), placement: 'top' }"
-          >
-            <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
-          </button>
-          <button @click="checkAllWebRTC(true)" :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']"
-            aria-label="Refresh WebRTC Test" v-tooltip="t('Tooltips.RefreshWebRTC')">
-            <i class="bi" :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
-          </button>
-        </div>
+        <button 
+          @click="toggleVisibility" 
+          class="btn btn-sm"
+          :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+          v-tooltip="{ title: isVisible ? t('webrtc.Hide') : t('webrtc.Show'), placement: 'top' }"
+        >
+          <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+        </button>
       </div>
       <Transition name="slide-fade">
         <div v-if="isVisible">
-          <div class="text-secondary">
-            <p>{{ t('webrtc.Note') }}</p>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="text-secondary">
+              <p>{{ t('webrtc.Note') }}</p>
+            </div>
+            <button @click="checkAllWebRTC(true)" :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']"
+              aria-label="Refresh WebRTC Test" v-tooltip="t('Tooltips.RefreshWebRTC')">
+              <i class="bi" :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
+            </button>
           </div>
           <div v-if="isIPLeaked" class="alert alert-warning mb-3" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>

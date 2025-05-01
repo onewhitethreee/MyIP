@@ -3,25 +3,26 @@
   <div class="availability-test-section mb-4">
     <div class="jn-title2 d-flex justify-content-between align-items-center">
       <h2 id="Connectivity" :class="{ 'mobile-h2': isMobile }">🚦 {{ t('connectivity.Title') }}</h2>
-      <div class="d-flex align-items-center">
-        <button 
-          @click="toggleVisibility" 
-          class="btn btn-sm me-2"
-          :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
-          v-tooltip="{ title: isVisible ? t('connectivity.Hide') : t('connectivity.Show'), placement: 'top' }"
-        >
-          <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
-        </button>
-        <button @click="checkAllConnectivity(false, true, true)"
-          :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh Connectivity Test"
-          v-tooltip="t('Tooltips.RefreshConnectivityTests')"><i class="bi"
-            :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i></button>
-      </div>
+      <button 
+        @click="toggleVisibility" 
+        class="btn btn-sm"
+        :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+        v-tooltip="{ title: isVisible ? t('connectivity.Hide') : t('connectivity.Show'), placement: 'top' }"
+      >
+        <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+      </button>
     </div>
     <Transition name="slide-fade">
       <div v-if="isVisible">
-        <div class="text-secondary">
-          <p>{{ t('connectivity.Note') }}</p>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="text-secondary">
+            <p>{{ t('connectivity.Note') }}</p>
+          </div>
+          <button @click="checkAllConnectivity(false, true, true)"
+            :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh Connectivity Test"
+            v-tooltip="t('Tooltips.RefreshConnectivityTests')">
+            <i class="bi" :class="[isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
+          </button>
         </div>
         <div class="row">
           <div v-for="test in connectivityTests" :key="test.id" class="col-6 col-md-3 mb-4">
