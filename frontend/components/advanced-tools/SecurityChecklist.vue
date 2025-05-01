@@ -101,7 +101,7 @@
                 <div class="card jn-card mb-2" :class="{ 
                     'dark-mode dark-mode-border': isDarkMode,
                     'jn-checklist-cat-card': item === currentList
-                    }" v-for="(item, index) in categories">
+                    }" v-for="item in categories" :key="item">
                     <div class="card-body p-1">
 
                         <div @click="changeList(item,true)"

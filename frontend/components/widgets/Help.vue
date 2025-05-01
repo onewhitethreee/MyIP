@@ -17,7 +17,7 @@
                     <div class="row flex-nowrap text-nowrap">
                         <!-- 左边的列 -->
                         <div class="col text-nowrap ">
-                            <div v-for="(key, index) in splitKeyMap.left" :key="`left-${key.keys}`"
+                            <div v-for="key in splitKeyMap.left" :key="`left-${key.keys}`"
                                 class="row p-2 justify-content-between mx-1"
                                 :class="[isDarkMode ? 'border-dark-subtle jn-dark-mode-help-border' : 'border-light-subtle']">
                                 <div class="col-8">
@@ -32,7 +32,7 @@
                         </div>
                         <!-- 右边的列 -->
                         <div class="col text-nowrap">
-                            <div v-for="(key, index) in splitKeyMap.right" :key="`right-${key.keys}`"
+                            <div v-for="key in splitKeyMap.right" :key="`right-${key.keys}`"
                                 class="row p-2 justify-content-between mx-1"
                                 :class="[isDarkMode ? 'border-dark-subtle jn-dark-mode-help-border' : 'border-light-subtle']">
                                 <div class="col-8">
