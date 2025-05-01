@@ -3,7 +3,6 @@
   <div class="speed-test-section mb-4">
     <div class="jn-title2">
       <h2 id="SpeedTest" :class="{ 'mobile-h2': isMobile }">🚀 {{ t('speedtest.Title') }}</h2>
-
     </div>
     <div class="text-secondary">
       <p>{{ t('speedtest.Note') }}</p>
@@ -12,10 +11,12 @@
       <div class="col-12 mb-3">
         <div class="card jn-card keyboard-shortcut-card" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
           <div class="card-body">
-
+            <!-- 控制面板 -->
             <div class="row justify-content-end mt-3 mb-4" :data-bs-theme="isDarkMode ? 'dark' : ''">
               <div class="input-group" :class="[isMobile ? 'w-100' : 'w-50']">
-                <span class="input-group-text"><i class="bi bi-cloud-download"></i></span>
+                <span class="input-group-text animated-icon">
+                  <i class="bi bi-cloud-download"></i>
+                </span>
                 <select aria-label="Download Bytes" class="form-select" :class="{ 'jn-ip-font': isMobile }"
                   id="downloadBytes"
                   :disabled="state.speedTest.status === 'running' || state.speedTest.status === 'paused'"
@@ -23,7 +24,9 @@
                   <option v-for="size in [100e6, 50e6, 15e6, 10e6, 1e6]" :key="size" :value="size">{{ size / 1e6 }} MB
                   </option>
                 </select>
-                <span class="input-group-text"><i class="bi bi-cloud-upload"></i></span>
+                <span class="input-group-text animated-icon">
+                  <i class="bi bi-cloud-upload"></i>
+                </span>
                 <select aria-label="Upload Bytes" class="form-select" :class="{ 'jn-ip-font': isMobile }"
                   id="uploadBytes"
                   :disabled="state.speedTest.status === 'running' || state.speedTest.status === 'paused'"
@@ -31,7 +34,7 @@
                   <option v-for="size in [100e6, 50e6, 15e6, 10e6, 1e6]" :key="size" :value="size">{{ size / 1e6 }} MB
                   </option>
                 </select>
-                <button @click="speedTestController" class="btn"
+                <button @click="speedTestController" class="btn pulse-button"
                   :class="[isDarkMode ? 'jn-startbtn-dark' : 'btn-light jn-startbtn']"
                   aria-label="Start/Pause Speed Test"
                   v-tooltip="{ title: t('Tooltips.SpeedTestButton'), placement: 'top' }">
@@ -39,102 +42,90 @@
                     <i class="bi bi-pause-fill"></i>
                   </span>
                   <span v-else-if="state.speedTest.status === 'finished' || state.speedTest.status === 'error'">
-                    <i class="bi bi-arrow-clockwise"></i>
+                    <i class="bi bi-arrow-clockwise rotate-icon"></i>
                   </span>
                   <span v-else><i class="bi bi-caret-right-fill"></i></span>
                 </button>
               </div>
             </div>
 
-            <Transition name="slide-fade">
-              <div class="d-flex align-items-center align-content-center justify-content-end pb-2"
+            <!-- 连接信息 -->
+            <Transition name="fade-slide">
+              <div class="d-flex align-items-center align-content-center justify-content-end pb-2 connection-info"
                 :data-bs-theme="isDarkMode ? 'dark' : ''"
                 v-if="state.speedTest.status !== 'idle' && state.connection.colo">
-                <div>
-                  <i class="bi bi-person-arms-up"></i>
-                  {{state.connection.country}}
+                <div class="connection-item">
+                  <i class="bi bi-person-arms-up bounce-in"></i>
+                  {{ state.connection.country }}
                   <span v-if="state.connection.country"
                     :class="'jn-fl fi fi-' + state.connection.loc.toLowerCase()"></span>
                 </div>
-                <div class=" mx-2">
-                  <i class="bi bi-arrow-left-right"></i>
+                <div class="mx-2 connection-arrow">
+                  <i class="bi bi-arrow-left-right pulse"></i>
                 </div>
-                <div>
-                  <i class="bi bi-globe"></i>
-                  {{state.connection.colo}},&nbsp;
-                  {{state.connection.coloCountry}} <span v-if="state.connection.coloCountry"
+                <div class="connection-item">
+                  <i class="bi bi-globe spin-slow"></i>
+                  {{ state.connection.colo }},&nbsp;
+                  {{ state.connection.coloCountry }} <span v-if="state.connection.coloCountry"
                     :class="'jn-fl fi fi-' + state.connection.coloCountryCode.toLowerCase()"></span>
                 </div>
               </div>
             </Transition>
-            <div class="progress" style="height: 20px; margin: 4pt 0 20pt 0;"
+
+            <!-- 进度条 -->
+            <div class="progress progress-container"
               :class="{ 'jn-opacity-0': state.speedTest.status == 'idle', 'jn-progress-dark': isDarkMode }">
-              <div class="progress-bar progress-bar-striped jn-progress"
+              <div class="progress-bar progress-bar-striped jn-progress progress-animated"
                 :class="[state.speedTest.status === 'finished' ? 'bg-success' : 'bg-info progress-bar-animated']"
                 role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
                 id="speedtest-progress" aria-label="Progress Bar">
               </div>
             </div>
-            <div class="row" style="margin-bottom: 10pt;">
-              <div :class="['text-center', isMobile ? 'col-6' : 'col-3']">
+
+            <!-- 测试结果数值 -->
+            <div class="row metrics-container">
+              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
                 <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Download') }}</p>
-                <p id="download-speed" class="speedtest-h5" :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number">{{ state.speedTest.downloadSpeed }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'">Mb/s</span>
+                <p id="download-speed" class="speedtest-h5 metric-value"
+                  :class="updateSpeedTestColor(state.speedTest.status)">
+                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.downloadSpeed }}</span>
+                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">Mb/s</span>
                 </p>
               </div>
-              <div :class="['text-center', isMobile ? 'col-6' : 'col-3']">
+              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
                 <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Upload') }}</p>
-                <p id="upload-speed" class="speedtest-h5" :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number">{{ state.speedTest.uploadSpeed }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'">Mb/s</span>
+                <p id="upload-speed" class="speedtest-h5 metric-value"
+                  :class="updateSpeedTestColor(state.speedTest.status)">
+                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.uploadSpeed }}</span>
+                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">Mb/s</span>
                 </p>
               </div>
-              <div :class="['text-center', isMobile ? 'col-6' : 'col-3']">
+              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
                 <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Latency') }}</p>
-                <p id="latency" class="speedtest-h5" :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number">{{ state.speedTest.latency }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'">ms</span>
+                <p id="latency" class="speedtest-h5 metric-value" :class="updateSpeedTestColor(state.speedTest.status)">
+                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.latency }}</span>
+                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">ms</span>
                 </p>
               </div>
-              <div :class="['text-center', isMobile ? 'col-6' : 'col-3']">
+              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
                 <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Jitter') }}</p>
-                <p id="jitter" class="speedtest-h5" :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number">{{ state.speedTest.jitter }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'">ms</span>
+                <p id="jitter" class="speedtest-h5 metric-value" :class="updateSpeedTestColor(state.speedTest.status)">
+                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.jitter }}</span>
+                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">ms</span>
                 </p>
               </div>
             </div>
 
             <div id="result"></div>
 
-            <!-- 在结果区域上方添加图表 -->
-            <div class="speed-charts-container mb-4 jn-slide-in" v-show="state.speedTest.status !== 'idle'">
-              <div class="row">
-                <div class="col-md-6 col-lg-3">
-                  <div class="chart-wrapper">
-                    <canvas ref="downloadChart"></canvas>
-                  </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                  <div class="chart-wrapper">
-                    <canvas ref="uploadChart"></canvas>
-                  </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                  <div class="chart-wrapper">
-                    <canvas ref="latencyChart"></canvas>
-                  </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                  <div class="chart-wrapper">
-                    <canvas ref="jitterChart"></canvas>
-                  </div>
-                </div>
-              </div>
+            <!-- 集成图表 -->
+            <div class="unified-chart-container mb-4 scale-in" v-show="state.speedTest.status !== 'idle'">
+              <canvas ref="unifiedChart" class="unified-chart"></canvas>
             </div>
 
-            <div class="row alert alert-success m-1 p-2 jn-slide-in" :data-bs-theme="isDarkMode ? 'dark' : ''"
+            <!-- 测试结果 -->
+            <div class="row alert alert-success m-1 p-2 result-container"
+              :class="{ 'scale-in': state.speedTest.status === 'finished' }" :data-bs-theme="isDarkMode ? 'dark' : ''"
               v-if="state.speedTest.status === 'finished' && state.speedTest.hasScores">
               <p id="score" class="speedtest-p"><i class="bi bi-calendar2-check"></i>&nbsp;
                 <span v-if="state.connection.colo">
@@ -173,14 +164,14 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, markRaw, onUnmounted } from 'vue';
+import { reactive, computed, onMounted, markRaw, onUnmounted, ref } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
 import { isValidIP } from '@/utils/valid-ip.js';
 import getCountryName from '@/utils/country-name.js';
 import SpeedTestEngine from '@cloudflare/speedtest';
-import useSpeedTestCharts from '@/utils/use-speedtest-charts.js';
+import Chart from 'chart.js/auto';
 
 const { t } = useI18n();
 const store = useMainStore();
@@ -190,6 +181,10 @@ const isDarkMode = computed(() => store.isDarkMode);
 const isMobile = computed(() => store.isMobile);
 const lang = computed(() => store.lang);
 const isSignedIn = computed(() => store.isSignedIn);
+
+// 图表引用
+const unifiedChart = ref(null);
+let chartInstance = null;
 
 // 状态管理
 const state = reactive({
@@ -223,19 +218,14 @@ const state = reactive({
       upload: { bytes: 15e6, count: 4 },
       latency: { count: 30 }
     }
+  },
+  chartData: {
+    downloadSpeeds: [],
+    uploadSpeeds: [],
+    latencies: [],
+    jitters: []
   }
 });
-
-const {
-  downloadChart,
-  uploadChart,
-  latencyChart,
-  jitterChart,
-  updateCharts,
-  initStartingPoints,
-  destroyCharts,
-  resetChartData
-} = useSpeedTestCharts(t);
 
 // 连接数据处理
 const connectionMethods = {
@@ -268,6 +258,197 @@ const connectionMethods = {
     } catch (error) {
       console.error("Error fetching IP from SpeedTest Server:", error);
       return null;
+    }
+  }
+};
+
+// 图表方法
+const chartMethods = {
+  initChart() {
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    const ctx = unifiedChart.value.getContext('2d');
+
+    // 设置图表的渐变色
+    const downloadGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    downloadGradient.addColorStop(0, 'rgba(54, 162, 235, 0.8)');
+    downloadGradient.addColorStop(1, 'rgba(54, 162, 235, 0.1)');
+
+    const uploadGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    uploadGradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+    uploadGradient.addColorStop(1, 'rgba(75, 192, 192, 0.1)');
+
+    const latencyGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    latencyGradient.addColorStop(0, 'rgba(255, 159, 64, 0.8)');
+    latencyGradient.addColorStop(1, 'rgba(255, 159, 64, 0.1)');
+
+    const jitterGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    jitterGradient.addColorStop(0, 'rgba(153, 102, 255, 0.8)');
+    jitterGradient.addColorStop(1, 'rgba(153, 102, 255, 0.1)');
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: t('speedtest.Download') + ' (Mb/s)',
+            data: [],
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: downloadGradient,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          },
+          {
+            label: t('speedtest.Upload') + ' (Mb/s)',
+            data: [],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: uploadGradient,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          },
+          {
+            label: t('speedtest.Latency') + ' (ms)',
+            data: [],
+            borderColor: 'rgb(255, 159, 64)',
+            backgroundColor: latencyGradient,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            yAxisID: 'y1'
+          },
+          {
+            label: t('speedtest.Jitter') + ' (ms)',
+            data: [],
+            borderColor: 'rgb(153, 102, 255)',
+            backgroundColor: jitterGradient,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 500,
+          easing: 'easeOutQuart'
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true,
+              text: t('speedtest.Time')
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Mb/s'
+            },
+            beginAtZero: true,
+            grid: {
+              color: isDarkMode.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+            }
+          },
+          y1: {
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: 'ms'
+            },
+            beginAtZero: true,
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 10
+            }
+          },
+          tooltip: {
+            backgroundColor: isDarkMode.value ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+            titleColor: isDarkMode.value ? '#fff' : '#000',
+            bodyColor: isDarkMode.value ? '#fff' : '#000',
+            borderColor: isDarkMode.value ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: true,
+            animation: {
+              duration: 150
+            }
+          }
+        }
+      }
+    });
+
+    return chartInstance;
+  },
+
+  updateChart(downloadSpeed, uploadSpeed, latency, jitter) {
+    if (!chartInstance) return;
+
+    // 添加时间标签
+    const now = new Date();
+    const timeLabel = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+
+    // 限制数据点数量，保持图表流畅
+    const maxDataPoints = 20;
+
+    if (chartInstance.data.labels.length >= maxDataPoints) {
+      chartInstance.data.labels.shift();
+      chartInstance.data.datasets.forEach(dataset => dataset.data.shift());
+    }
+
+    chartInstance.data.labels.push(timeLabel);
+
+    // 更新各项数据
+    chartInstance.data.datasets[0].data.push(downloadSpeed);
+    chartInstance.data.datasets[1].data.push(uploadSpeed);
+    chartInstance.data.datasets[2].data.push(latency);
+    chartInstance.data.datasets[3].data.push(jitter);
+
+    // 应用动画更新图表
+    chartInstance.update('active');
+  },
+
+  resetChart() {
+    if (chartInstance) {
+      chartInstance.data.labels = [];
+      chartInstance.data.datasets.forEach(dataset => {
+        dataset.data = [];
+      });
+      chartInstance.update();
     }
   }
 };
@@ -348,6 +529,7 @@ const engineMethods = {
     try {
       const rawData = testEngine?.results?.raw;
       if (!rawData) return;
+
       // 处理延迟数据和计算抖动
       if (rawData.latency?.started) {
         if (rawData.latency?.results?.timings?.length > 0) {
@@ -407,13 +589,12 @@ const engineMethods = {
         }
       }
 
-      // 更新完状态后立即更新图表
-      updateCharts(
+      // 更新图表
+      chartMethods.updateChart(
         state.speedTest.downloadSpeed,
         state.speedTest.uploadSpeed,
         state.speedTest.latency,
-        state.speedTest.jitter,
-        rawData
+        state.speedTest.jitter
       );
 
     } catch (error) {
@@ -472,9 +653,9 @@ const achievementHandler = {
 const updateSpeedTestColor = (status) => {
   const colorMap = {
     idle: 'text-secondary',
-    running: 'text-info',
+    running: 'text-info pulse-text',
     paused: 'text-info',
-    finished: 'text-success',
+    finished: 'text-success fade-in',
     error: 'text-danger'
   };
   return colorMap[status] || '';
@@ -552,11 +733,7 @@ const speedTestController = async () => {
     }
 
     // 重置图表数据
-    resetChartData();
-    destroyCharts();
-
-    // 初始化图表并设置起始点
-    await initStartingPoints();
+    chartMethods.resetChart();
 
     Object.assign(state.speedTest, {
       downloadSpeed: 0,
@@ -587,6 +764,7 @@ const speedTestController = async () => {
 // 生命周期
 onMounted(() => {
   store.setMountingStatus('speedtest', true);
+  chartMethods.initChart();
 });
 
 // 清理
@@ -594,7 +772,10 @@ onUnmounted(() => {
   if (testEngine) {
     testEngine = null;
   }
-  destroyCharts();
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
 });
 
 // 暴露方法
@@ -604,84 +785,317 @@ defineExpose({
 </script>
 
 <style scoped>
+/* 基础按钮样式 */
 .jn-startbtn {
   background-color: rgb(248, 249, 250);
   border-color: rgb(222, 226, 230);
+  transition: all 0.3s ease;
 }
 
 .jn-startbtn-dark {
   background-color: rgb(20, 22, 24);
   border-color: rgb(73, 80, 87);
+  transition: all 0.3s ease;
 }
 
 .jn-startbtn-dark:hover {
   color: var(--bs-btn-hover-color);
   background-color: rgba(0, 0, 0, 0.33);
+  transform: scale(1.05);
 }
-
 
 .jn-startbtn:hover {
   color: var(--bs-btn-hover-color);
   background-color: var(--bs-btn-hover-bg);
   border-color: var(--bs-btn-hover-border-color);
+  transform: scale(1.05);
 }
 
+/* 警告文本颜色 */
 .jn-text-warning {
   --bs-text-opacity: 1;
   color: #c67c14;
 }
 
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
+/* 过渡动画 */
+.fade-slide-enter-active {
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.slide-fade-leave-active {
-  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+.fade-slide-leave-active {
+  transition: all 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53);
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(20px);
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  transform: translateY(20px);
   opacity: 0;
 }
 
-.speed-charts-container {
-  margin: 20pt 0;
+/* 图表容器 */
+.unified-chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  margin: 30px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.chart-wrapper {
-  position: relative;
-  height: 130pt;
+.unified-chart {
   width: 100%;
-  margin-bottom: 15pt;
+  height: 100%;
 }
 
 @media (max-width: 768px) {
-  .chart-wrapper {
-    height: 100pt;
-    margin-bottom: 20pt;
+  .unified-chart-container {
+    height: 250px;
   }
 }
 
-@media (min-width: 769px) and (max-width: 991px) {
-  .chart-wrapper {
-    height: 100pt;
-    margin-bottom: 25pt;
-  }
+/* 进度条容器 */
+.progress-container {
+  height: 20px;
+  margin: 4pt 0 20pt 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.jn-slide-in {
-  animation: slide-in 0.2s ease-in forwards;
+/* 进度条动画 */
+.progress-animated {
+  transition: width 0.5s ease-in-out;
+  background-size: 30px 30px;
+  background-image: linear-gradient(45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent);
+  animation: progress-bar-stripes 1s linear infinite;
 }
 
-@keyframes slide-in {
+@keyframes progress-bar-stripes {
   from {
-    transform: translateY(20px);
+    background-position: 30px 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* 指标容器 */
+.metrics-container {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.metric-item {
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.metric-item:hover {
+  transform: translateY(-5px);
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  transition: all 0.3s ease;
+}
+
+.metric-unit {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* 连接信息样式 */
+.connection-info {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.03);
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.connection-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 结果容器 */
+.result-container {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 动画效果 */
+.pulse-button {
+  position: relative;
+}
+
+.pulse-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  animation: pulse 1.5s infinite;
+  z-index: -1;
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    opacity: 0.7;
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    opacity: 0;
+  }
+}
+
+.pulse-text {
+  animation: pulse-text 1.5s infinite;
+}
+
+@keyframes pulse-text {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.rotate-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.rotate-icon:hover {
+  transform: rotate(180deg);
+}
+
+.animated-icon {
+  transition: all 0.3s ease;
+}
+
+.animated-icon:hover {
+  transform: scale(1.2);
+}
+
+.bounce-in {
+  animation: bounce-in 0.5s;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.spin-slow {
+  animation: spin 8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.connection-arrow i {
+  animation: pulse 2s infinite;
+}
+
+.scale-in {
+  animation: scale-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes scale-in {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.counter-animation {
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.counter-animation::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.counter-animation:hover::after {
+  transform: scaleX(1);
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
   }
 
   to {
-    transform: translateY(0);
     opacity: 1;
   }
 }
