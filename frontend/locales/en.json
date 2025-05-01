@@ -476,7 +476,8 @@
     "QueryIP": "Query IP Address",
     "GithubLink": "View Source Code on GitHub",
     "RefreshRuleTests": "Refresh Rule Tests",
-    "qualityScoreExplain": "The IP quality score is calculated based on multiple weighted factors, including the type of IP, whether it is a proxy/VPN, and the number of recent attack events detected from this IP. A higher score indicates better IP quality, reducing the likelihood of being blocked by risk control on some websites."
+    "qualityScoreExplain": "The IP quality score is calculated based on multiple weighted factors, including the type of IP, whether it is a proxy/VPN, and the number of recent attack events detected from this IP. A higher score indicates better IP quality, reducing the likelihood of being blocked by risk control on some websites.",
+    "ShowOnMap": "Click to view location on map"
   },
   "ipInfos": {
     "id": "ipinfos",
@@ -1167,5 +1168,15 @@
         ]
       }
     ]
+  },
+  "map": {
+    "Location": "Location",
+    "ShowOnMap": "Show on map",
+    "MapProvider": "Map Provider",
+    "GoogleMaps": "Google Maps",
+    "OpenStreetMap": "OpenStreetMap",
+    "BaiduMaps": "Baidu Maps",
+    "CopyCoordinates": "Copy Coordinates",
+    "GetDirections": "Get Directions"
   }
 }
