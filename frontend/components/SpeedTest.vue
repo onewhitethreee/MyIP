@@ -1,170 +1,182 @@
 <template>
   <!-- Speed Test -->
   <div class="speed-test-section mb-4">
-    <div class="jn-title2">
+    <div class="jn-title2 d-flex justify-content-between align-items-center">
       <h2 id="SpeedTest" :class="{ 'mobile-h2': isMobile }">🚀 {{ t('speedtest.Title') }}</h2>
+      <button 
+        @click="toggleVisibility" 
+        class="btn btn-sm"
+        :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+        v-tooltip="{ title: isVisible ? t('speedtest.Hide') : t('speedtest.Show'), placement: 'top' }"
+      >
+        <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+      </button>
     </div>
-    <div class="text-secondary">
-      <p>{{ t('speedtest.Note') }}</p>
-    </div>
-    <div class="row">
-      <div class="col-12 mb-3">
-        <div class="card jn-card keyboard-shortcut-card" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
-          <div class="card-body">
-            <!-- 控制面板 -->
-            <div class="row justify-content-end mt-3 mb-4" :data-bs-theme="isDarkMode ? 'dark' : ''">
-              <div class="input-group" :class="[isMobile ? 'w-100' : 'w-50']">
-                <span class="input-group-text animated-icon">
-                  <i class="bi bi-cloud-download"></i>
-                </span>
-                <select aria-label="Download Bytes" class="form-select" :class="{ 'jn-ip-font': isMobile }"
-                  id="downloadBytes"
-                  :disabled="state.speedTest.status === 'running' || state.speedTest.status === 'paused'"
-                  v-model="state.config.package.download.bytes">
-                  <option v-for="size in [100e6, 50e6, 15e6, 10e6, 1e6]" :key="size" :value="size">{{ size / 1e6 }} MB
-                  </option>
-                </select>
-                <span class="input-group-text animated-icon">
-                  <i class="bi bi-cloud-upload"></i>
-                </span>
-                <select aria-label="Upload Bytes" class="form-select" :class="{ 'jn-ip-font': isMobile }"
-                  id="uploadBytes"
-                  :disabled="state.speedTest.status === 'running' || state.speedTest.status === 'paused'"
-                  v-model="state.config.package.upload.bytes">
-                  <option v-for="size in [100e6, 50e6, 15e6, 10e6, 1e6]" :key="size" :value="size">{{ size / 1e6 }} MB
-                  </option>
-                </select>
-                <button @click="speedTestController" class="btn pulse-button"
-                  :class="[isDarkMode ? 'jn-startbtn-dark' : 'btn-light jn-startbtn']"
-                  aria-label="Start/Pause Speed Test"
-                  v-tooltip="{ title: t('Tooltips.SpeedTestButton'), placement: 'top' }">
-                  <span v-if="state.speedTest.status === 'running'">
-                    <i class="bi bi-pause-fill"></i>
-                  </span>
-                  <span v-else-if="state.speedTest.status === 'finished' || state.speedTest.status === 'error'">
-                    <i class="bi bi-arrow-clockwise rotate-icon"></i>
-                  </span>
-                  <span v-else><i class="bi bi-caret-right-fill"></i></span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 连接信息 -->
-            <Transition name="fade-slide">
-              <div class="d-flex align-items-center align-content-center justify-content-end pb-2 connection-info"
-                :data-bs-theme="isDarkMode ? 'dark' : ''"
-                v-if="state.speedTest.status !== 'idle' && state.connection.colo">
-                <div class="connection-item">
-                  <i class="bi bi-person-arms-up bounce-in"></i>
-                  {{ state.connection.country }}
-                  <span v-if="state.connection.country"
-                    :class="'jn-fl fi fi-' + state.connection.loc.toLowerCase()"></span>
+    <Transition name="slide-fade">
+      <div v-if="isVisible">
+        <div class="text-secondary">
+          <p>{{ t('speedtest.Note') }}</p>
+        </div>
+        <div class="row">
+          <div class="col-12 mb-3">
+            <div class="card jn-card keyboard-shortcut-card" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
+              <div class="card-body">
+                <!-- 控制面板 -->
+                <div class="row justify-content-end mt-3 mb-4" :data-bs-theme="isDarkMode ? 'dark' : ''">
+                  <div class="input-group" :class="[isMobile ? 'w-100' : 'w-50']">
+                    <span class="input-group-text animated-icon">
+                      <i class="bi bi-cloud-download"></i>
+                    </span>
+                    <select aria-label="Download Bytes" class="form-select" :class="{ 'jn-ip-font': isMobile }"
+                      id="downloadBytes"
+                      :disabled="state.speedTest.status === 'running' || state.speedTest.status === 'paused'"
+                      v-model="state.config.package.download.bytes">
+                      <option v-for="size in [100e6, 50e6, 15e6, 10e6, 1e6]" :key="size" :value="size">{{ size / 1e6 }} MB
+                      </option>
+                    </select>
+                    <span class="input-group-text animated-icon">
+                      <i class="bi bi-cloud-upload"></i>
+                    </span>
+                    <select aria-label="Upload Bytes" class="form-select" :class="{ 'jn-ip-font': isMobile }"
+                      id="uploadBytes"
+                      :disabled="state.speedTest.status === 'running' || state.speedTest.status === 'paused'"
+                      v-model="state.config.package.upload.bytes">
+                      <option v-for="size in [100e6, 50e6, 15e6, 10e6, 1e6]" :key="size" :value="size">{{ size / 1e6 }} MB
+                      </option>
+                    </select>
+                    <button @click="speedTestController" class="btn pulse-button"
+                      :class="[isDarkMode ? 'jn-startbtn-dark' : 'btn-light jn-startbtn']"
+                      aria-label="Start/Pause Speed Test"
+                      v-tooltip="{ title: t('Tooltips.SpeedTestButton'), placement: 'top' }">
+                      <span v-if="state.speedTest.status === 'running'">
+                        <i class="bi bi-pause-fill"></i>
+                      </span>
+                      <span v-else-if="state.speedTest.status === 'finished' || state.speedTest.status === 'error'">
+                        <i class="bi bi-arrow-clockwise rotate-icon"></i>
+                      </span>
+                      <span v-else><i class="bi bi-caret-right-fill"></i></span>
+                    </button>
+                  </div>
                 </div>
-                <div class="mx-2 connection-arrow">
-                  <i class="bi bi-arrow-left-right pulse"></i>
+
+                <!-- 连接信息 -->
+                <Transition name="fade-slide">
+                  <div class="d-flex align-items-center align-content-center justify-content-end pb-2 connection-info"
+                    :data-bs-theme="isDarkMode ? 'dark' : ''"
+                    v-if="state.speedTest.status !== 'idle' && state.connection.colo">
+                    <div class="connection-item">
+                      <i class="bi bi-person-arms-up bounce-in"></i>
+                      {{ state.connection.country }}
+                      <span v-if="state.connection.country"
+                        :class="'jn-fl fi fi-' + state.connection.loc.toLowerCase()"></span>
+                    </div>
+                    <div class="mx-2 connection-arrow">
+                      <i class="bi bi-arrow-left-right pulse"></i>
+                    </div>
+                    <div class="connection-item">
+                      <i class="bi bi-globe spin-slow"></i>
+                      {{ state.connection.colo }},&nbsp;
+                      {{ state.connection.coloCountry }} <span v-if="state.connection.coloCountry"
+                        :class="'jn-fl fi fi-' + state.connection.coloCountryCode.toLowerCase()"></span>
+                    </div>
+                  </div>
+                </Transition>
+
+                <!-- 进度条 -->
+                <div class="progress progress-container"
+                  :class="{ 'jn-opacity-0': state.speedTest.status == 'idle', 'jn-progress-dark': isDarkMode }">
+                  <div class="progress-bar progress-bar-striped jn-progress progress-animated"
+                    :class="[state.speedTest.status === 'finished' ? 'bg-success' : 'bg-info progress-bar-animated']"
+                    role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                    id="speedtest-progress" aria-label="Progress Bar">
+                  </div>
                 </div>
-                <div class="connection-item">
-                  <i class="bi bi-globe spin-slow"></i>
-                  {{ state.connection.colo }},&nbsp;
-                  {{ state.connection.coloCountry }} <span v-if="state.connection.coloCountry"
-                    :class="'jn-fl fi fi-' + state.connection.coloCountryCode.toLowerCase()"></span>
+
+                <!-- 测试结果数值 -->
+                <div class="row metrics-container">
+                  <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
+                    <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Download') }}</p>
+                    <p id="download-speed" class="speedtest-h5 metric-value"
+                      :class="updateSpeedTestColor(state.speedTest.status)">
+                      <span class="jn-speedtest-number counter-animation">{{ state.speedTest.downloadSpeed }}</span>
+                      <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">Mb/s</span>
+                    </p>
+                  </div>
+                  <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
+                    <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Upload') }}</p>
+                    <p id="upload-speed" class="speedtest-h5 metric-value"
+                      :class="updateSpeedTestColor(state.speedTest.status)">
+                      <span class="jn-speedtest-number counter-animation">{{ state.speedTest.uploadSpeed }}</span>
+                      <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">Mb/s</span>
+                    </p>
+                  </div>
+                  <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
+                    <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Latency') }}</p>
+                    <p id="latency" class="speedtest-h5 metric-value" :class="updateSpeedTestColor(state.speedTest.status)">
+                      <span class="jn-speedtest-number counter-animation">{{ state.speedTest.latency }}</span>
+                      <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">ms</span>
+                    </p>
+                  </div>
+                  <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
+                    <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Jitter') }}</p>
+                    <p id="jitter" class="speedtest-h5 metric-value" :class="updateSpeedTestColor(state.speedTest.status)">
+                      <span class="jn-speedtest-number counter-animation">{{ state.speedTest.jitter }}</span>
+                      <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">ms</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div id="result"></div>
+
+                <!-- 集成图表 -->
+                <div class="unified-chart-container mb-4 scale-in" v-show="state.speedTest.status !== 'idle'">
+                  <canvas ref="unifiedChart" class="unified-chart"></canvas>
+                </div>
+
+                <!-- 测试结果 -->
+                <div class="row alert alert-success m-1 p-2 result-container"
+                  :class="{ 'scale-in': state.speedTest.status === 'finished' }" :data-bs-theme="isDarkMode ? 'dark' : ''"
+                  v-if="state.speedTest.status === 'finished' && state.speedTest.hasScores">
+                  <p id="score" class="speedtest-p"><i class="bi bi-calendar2-check"></i>&nbsp;
+                    <span v-if="state.connection.colo">
+                      {{ t('speedtest.connectionFrom') }}
+                      {{ state.connection.ip }} ( {{ state.connection.country }} )
+                      {{ t('speedtest.connectionTo') }}
+                      {{ state.connection.colo }}
+                      ( {{ state.connection.coloCity }}
+                      , {{ state.connection.coloCountry }} )
+                      {{ t('speedtest.connectionEnd') }}
+                    </span>
+                    {{ t('speedtest.score') }}
+                    {{ t('speedtest.videoStreaming') }}
+                    <span
+                      :class="state.speedTest.streamingScore >= 50 ? 'text-success' : state.speedTest.streamingScore >= 10 ? 'jn-text-warning' : 'text-danger'">
+                      {{ t('speedtest.quality.' + state.speedTest.streamingQuality) }}
+                    </span>
+                    {{ t('speedtest.gaming') }}
+                    <span
+                      :class="state.speedTest.gamingScore >= 50 ? 'text-success' : state.speedTest.gamingScore >= 10 ? 'jn-text-warning' : 'text-danger'">
+                      {{ t('speedtest.quality.' + state.speedTest.gamingQuality) }}
+                    </span>
+                    {{ t('speedtest.rtc') }}
+                    <span
+                      :class="state.speedTest.rtcScore >= 50 ? 'text-success' : state.speedTest.rtcScore >= 10 ? 'jn-text-warning' : 'text-danger'">
+                      {{ t('speedtest.quality.' + state.speedTest.rtcQuality) }}
+                    </span>
+                    {{ t('speedtest.resultNote') }}
+                  </p>
                 </div>
               </div>
-            </Transition>
-
-            <!-- 进度条 -->
-            <div class="progress progress-container"
-              :class="{ 'jn-opacity-0': state.speedTest.status == 'idle', 'jn-progress-dark': isDarkMode }">
-              <div class="progress-bar progress-bar-striped jn-progress progress-animated"
-                :class="[state.speedTest.status === 'finished' ? 'bg-success' : 'bg-info progress-bar-animated']"
-                role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
-                id="speedtest-progress" aria-label="Progress Bar">
-              </div>
-            </div>
-
-            <!-- 测试结果数值 -->
-            <div class="row metrics-container">
-              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
-                <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Download') }}</p>
-                <p id="download-speed" class="speedtest-h5 metric-value"
-                  :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.downloadSpeed }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">Mb/s</span>
-                </p>
-              </div>
-              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
-                <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Upload') }}</p>
-                <p id="upload-speed" class="speedtest-h5 metric-value"
-                  :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.uploadSpeed }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">Mb/s</span>
-                </p>
-              </div>
-              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
-                <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Latency') }}</p>
-                <p id="latency" class="speedtest-h5 metric-value" :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.latency }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">ms</span>
-                </p>
-              </div>
-              <div :class="['text-center metric-item', isMobile ? 'col-6' : 'col-3']">
-                <p class="speedtest-h5 jn-con-title">{{ t('speedtest.Jitter') }}</p>
-                <p id="jitter" class="speedtest-h5 metric-value" :class="updateSpeedTestColor(state.speedTest.status)">
-                  <span class="jn-speedtest-number counter-animation">{{ state.speedTest.jitter }}</span>
-                  <span v-if="state.speedTest.status !== 'idle'" class="metric-unit">ms</span>
-                </p>
-              </div>
-            </div>
-
-            <div id="result"></div>
-
-            <!-- 集成图表 -->
-            <div class="unified-chart-container mb-4 scale-in" v-show="state.speedTest.status !== 'idle'">
-              <canvas ref="unifiedChart" class="unified-chart"></canvas>
-            </div>
-
-            <!-- 测试结果 -->
-            <div class="row alert alert-success m-1 p-2 result-container"
-              :class="{ 'scale-in': state.speedTest.status === 'finished' }" :data-bs-theme="isDarkMode ? 'dark' : ''"
-              v-if="state.speedTest.status === 'finished' && state.speedTest.hasScores">
-              <p id="score" class="speedtest-p"><i class="bi bi-calendar2-check"></i>&nbsp;
-                <span v-if="state.connection.colo">
-                  {{ t('speedtest.connectionFrom') }}
-                  {{ state.connection.ip }} ( {{ state.connection.country }} )
-                  {{ t('speedtest.connectionTo') }}
-                  {{ state.connection.colo }}
-                  ( {{ state.connection.coloCity }}
-                  , {{ state.connection.coloCountry }} )
-                  {{ t('speedtest.connectionEnd') }}
-                </span>
-                {{ t('speedtest.score') }}
-                {{ t('speedtest.videoStreaming') }}
-                <span
-                  :class="state.speedTest.streamingScore >= 50 ? 'text-success' : state.speedTest.streamingScore >= 10 ? 'jn-text-warning' : 'text-danger'">
-                  {{ t('speedtest.quality.' + state.speedTest.streamingQuality) }}
-                </span>
-                {{ t('speedtest.gaming') }}
-                <span
-                  :class="state.speedTest.gamingScore >= 50 ? 'text-success' : state.speedTest.gamingScore >= 10 ? 'jn-text-warning' : 'text-danger'">
-                  {{ t('speedtest.quality.' + state.speedTest.gamingQuality) }}
-                </span>
-                {{ t('speedtest.rtc') }}
-                <span
-                  :class="state.speedTest.rtcScore >= 50 ? 'text-success' : state.speedTest.rtcScore >= 10 ? 'jn-text-warning' : 'text-danger'">
-                  {{ t('speedtest.quality.' + state.speedTest.rtcQuality) }}
-                </span>
-                {{ t('speedtest.resultNote') }}
-              </p>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, markRaw, onUnmounted, ref } from 'vue';
+import { reactive, computed, onMounted, markRaw, onUnmounted, ref, watch, nextTick } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
@@ -224,6 +236,24 @@ const state = reactive({
     uploadSpeeds: [],
     latencies: [],
     jitters: []
+  }
+});
+
+// 添加显示/隐藏状态
+const isVisible = ref(true);
+
+// 添加切换可见性的方法
+const toggleVisibility = () => {
+  isVisible.value = !isVisible.value;
+};
+
+// 监听可见性变化
+watch(isVisible, (newValue) => {
+  if (newValue) {
+    // 当组件变为可见时，重新初始化图表
+    nextTick(() => {
+      chartMethods.initChart();
+    });
   }
 });
 
@@ -1098,5 +1128,38 @@ defineExpose({
   to {
     opacity: 1;
   }
+}
+
+/* 添加过渡动画 */
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+
+/* 调整标题样式 */
+.jn-title2 {
+  margin-bottom: 1rem;
+}
+
+/* 调整按钮样式 */
+.btn-outline-dark,
+.btn-outline-light {
+  padding: 0.25rem 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-dark:hover,
+.btn-outline-light:hover {
+  transform: scale(1.1);
 }
 </style>
