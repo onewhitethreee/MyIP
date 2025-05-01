@@ -1,105 +1,127 @@
 <template>
-    <!-- MAC Checker -->
-    <div class="mac-checker-section my-4">
-        <div class="text-secondary">
-            <p>{{ t('macchecker.Note') }}</p>
+    <!-- Enhanced MAC Checker -->
+    <div class="mac-checker-section my-5">
+        <div class="text-secondary mb-3">
+            <p class="lead">{{ t('macchecker.Note') }}</p>
         </div>
         <div class="row">
-            <div class="col-12 mb-3">
-                <div class="card jn-card" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
-                    <div class="card-body">
-                        <div class="col-12 col-md-auto">
-                            <label for="queryMAC" class="col-form-label">{{ t('macchecker.Note2') }}</label>
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm rounded-lg" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
+                    <div class="card-header bg-transparent py-3">
+                        <h2 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-wifi me-2"></i>{{ t('macchecker.Title') || 'MAC Address Checker' }}
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="col-12">
+                            <label for="queryMAC" class="form-label fw-semibold">
+                                {{ t('macchecker.Note2') }}
+                            </label>
                         </div>
 
-                        <div class="input-group mb-2 mt-2">
-                            <input type="text" class="form-control" :class="{ 'dark-mode': isDarkMode }"
-                                :disabled="macCheckStatus === 'running'" :placeholder="t('macchecker.Placeholder')"
-                                v-model="queryMAC" @keyup.enter="onSubmit" name="queryMAC" id="queryMAC" data-1p-ignore>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-light border-end-0"
+                                :class="{ 'bg-dark text-light': isDarkMode }">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 shadow-none"
+                                :class="{ 'dark-mode': isDarkMode }" :disabled="macCheckStatus === 'running'"
+                                :placeholder="t('macchecker.Placeholder')" v-model="queryMAC" @keyup.enter="onSubmit"
+                                name="queryMAC" id="queryMAC" data-1p-ignore>
 
-                            <button class="btn btn-primary" @click="onSubmit"
+                            <button class="btn btn-primary px-4" @click="onSubmit"
                                 :disabled="macCheckStatus === 'running' || !queryMAC">
-                                <span v-if="macCheckStatus !== 'running'">{{ t('macchecker.Run') }}</span>
-                                <span v-else class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                                <span v-if="macCheckStatus !== 'running'">
+                                    <i class="bi bi-search me-1"></i>{{ t('macchecker.Run') }}
+                                </span>
+                                <span v-else>
+                                    <span class="spinner-grow spinner-grow-sm me-1" aria-hidden="true"></span>
+                                    {{ t('macchecker.Searching') || 'Searching...' }}
+                                </span>
                             </button>
                         </div>
 
-                        <!-- 添加服务器选择 -->
-                        <div class="mb-3">
-                            <label class="form-label">{{ t('macchecker.SelectServers') }}</label>
-                            <div class="server-options">
+                        <!-- Server selection -->
+                        <div class="mb-4 p-3 bg-light rounded" :class="{ 'bg-dark': isDarkMode }">
+                            <label class="form-label fw-semibold mb-2">
+                                <i class="bi bi-server me-1"></i>{{ t('macchecker.SelectServers') }}
+                            </label>
+                            <div class="server-options d-flex flex-wrap gap-3">
                                 <div class="form-check" v-for="server in availableServers" :key="server">
-                                    <input 
-                                        type="radio" 
-                                        class="form-check-input" 
-                                        :class="{
-                                            'jn-check-dark': isDarkMode,
-                                            'jn-check-light': !isDarkMode
-                                        }"
-                                        :name="'server_' + server"
-                                        :id="'server_' + server"
-                                        :value="server"
+                                    <input type="radio" class="form-check-input" :class="{
+                                        'jn-check-dark': isDarkMode,
+                                        'jn-check-light': !isDarkMode
+                                    }" :name="'server_' + server" :id="'server_' + server" :value="server"
                                         v-model="selectedServer">
                                     <label class="form-check-label jn-number" :for="'server_' + server">
                                         {{ server }}
                                     </label>
                                 </div>
                             </div>
+
+                            <!-- Cache clear button -->
+                            <div class="mt-3 d-flex justify-content-end">
+                                <button class="btn btn-sm btn-outline-secondary" @click="clearCache">
+                                    <i class="bi bi-trash me-1"></i> {{ t('macchecker.ClearCache') || 'Clear Cache' }}
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- 添加清除缓存按钮 -->
-                        <div class="mt-2 mb-2 d-flex justify-content-end">
-                            <button class="btn btn-sm btn-outline-secondary" @click="clearCache">
-                                <i class="bi bi-trash"></i> {{ t('macchecker.ClearCache') || '清除缓存' }}
-                            </button>
-                        </div>
-
+                        <!-- Error message display -->
                         <div class="jn-placeholder">
-                            <p v-if="errorMsg" class="text-danger">{{ errorMsg }}</p>
+                            <div v-if="errorMsg" class="alert alert-danger py-2 px-3 d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <span>{{ errorMsg }}</span>
+                            </div>
                         </div>
 
-                        <!-- Result Display -->
-
-                        <div id="macCheckResult" class="row" v-if="macCheckResult.success">
+                        <!-- Results Display -->
+                        <div id="macCheckResult" class="row mt-4" v-if="macCheckResult.success">
                             <div class="col-lg-8 col-md-8 col-12 mb-4">
-                                <div class="card h-100" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
-                                    <div class="card-body row">
-                                        <h3 class="mb-4">{{ t('macchecker.manufacturer') }}</h3>
+                                <div class="card h-100 border-primary border-opacity-25 shadow-sm"
+                                    :class="{ 'dark-mode dark-mode-border': isDarkMode }">
+                                    <div class="card-header bg-primary bg-opacity-10 py-3">
+                                        <h3 class="mb-0 fs-4">
+                                            <i class="bi bi-building me-2"></i>{{ t('macchecker.manufacturer') }}
+                                        </h3>
+                                    </div>
+                                    <div class="card-body p-4 row">
                                         <div class="col-lg-6 col-md-6 col-12">
-                                            <div class="jn-detail" v-for="item in leftItems" :key="item.key">
-                                                <span>
+                                            <div class="jn-detail mb-3" v-for="item in leftItems" :key="item.key">
+                                                <span class="text-secondary small text-uppercase">
                                                     {{ t(`macchecker.${item.key}`) }}
                                                 </span>
-                                                <span class="jn-con-title card-title mt-1">
+                                                <span class="jn-con-title fs-5 fw-semibold mt-1 text-primary">
                                                     {{ macCheckResult[item.key] }}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div class="col-lg-6 col-md-6 col-12">
-                                            <div class="jn-detail">
-                                                <span>
+                                            <div class="jn-detail mb-3">
+                                                <span class="text-secondary small text-uppercase">
                                                     {{ t('macchecker.company') }}
                                                 </span>
-                                                <span class="jn-con-title card-title mt-1">
+                                                <span class="jn-con-title fs-5 fw-semibold mt-1 text-primary">
                                                     {{ macCheckResult.company }}
                                                 </span>
                                             </div>
-                                            <div v-if="macCheckResult.country !== 'N/A'" class="jn-detail">
-                                                <span>
+                                            <div v-if="macCheckResult.country !== 'N/A'" class="jn-detail mb-3">
+                                                <span class="text-secondary small text-uppercase">
                                                     {{ t('macchecker.country') }}
                                                 </span>
-                                                <span class="jn-con-title card-title mt-1">
+                                                <span
+                                                    class="jn-con-title fs-5 fw-semibold mt-1 d-flex align-items-center">
                                                     <span
-                                                        :class="'jn-fl fi fi-' + macCheckResult.country.toLowerCase()"></span>
+                                                        :class="'jn-fl fi fi-' + macCheckResult.country.toLowerCase() + ' me-2'"></span>
                                                     {{ getCountryName(macCheckResult.country, lang) }}
                                                 </span>
                                             </div>
-                                            <div class="jn-detail">
-                                                <span>
+                                            <div class="jn-detail mb-3">
+                                                <span class="text-secondary small text-uppercase">
                                                     {{ t('macchecker.address') }}
                                                 </span>
-                                                <span class="jn-con-title card-title mt-1">
+                                                <span class="jn-con-title fs-5 fw-semibold mt-1">
                                                     {{ macCheckResult.address }}
                                                 </span>
                                             </div>
@@ -109,23 +131,33 @@
                             </div>
 
                             <div class="col-lg-4 col-md-4 col-12 mb-4">
-                                <div class="card h-100" :class="{ 'dark-mode dark-mode-border': isDarkMode}">
-                                    <div class="card-body">
-                                        <h3 class="mb-4">{{ t('macchecker.property') }}</h3>
-                                        <div class="table-responsive text-nowrap">
-                                            <table class="table table-hover" :class="{ 'table-dark': isDarkMode }">
+                                <div class="card h-100 border-success border-opacity-25 shadow-sm"
+                                    :class="{ 'dark-mode dark-mode-border': isDarkMode }">
+                                    <div class="card-header bg-success bg-opacity-10 py-3">
+                                        <h3 class="mb-0 fs-4">
+                                            <i class="bi bi-info-circle me-2"></i>{{ t('macchecker.property') }}
+                                        </h3>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0" :class="{ 'table-dark': isDarkMode }">
                                                 <thead>
-                                                    <tr>
-                                                        <th scope="col">{{ t('macchecker.property') }}</th>
-                                                        <th scope="col">{{ t('macchecker.value') }}</th>
+                                                    <tr class="table-light" :class="{ 'table-secondary': isDarkMode }">
+                                                        <th scope="col" class="border-0">{{ t('macchecker.property') }}
+                                                        </th>
+                                                        <th scope="col" class="border-0 text-center">{{
+                                                            t('macchecker.value') }}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr v-for="item in tableItems" :key="item.key">
-                                                        <td>{{ t(`macchecker.${item.key}`) }}</td>
-                                                        <td>
-                                                            <i class="bi"
-                                                                :class="macCheckResult[item.key] ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-secondary'"></i>
+                                                        <td class="fw-medium">{{ t(`macchecker.${item.key}`) }}</td>
+                                                        <td class="text-center">
+                                                            <i class="bi" :class="[
+                                                                macCheckResult[item.key]
+                                                                    ? 'bi-check-circle-fill text-success fs-5'
+                                                                    : 'bi-x-circle-fill text-secondary fs-5'
+                                                            ]"></i>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -134,7 +166,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
                     </div>
@@ -145,7 +176,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
@@ -163,14 +194,25 @@ const macCheckStatus = ref("idle");
 const queryMAC = ref('');
 const errorMsg = ref('');
 
-// 缓存相关常量
+// Cache related constants
 const CACHE_KEY = 'mac_lookup_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24小时
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
 const availableServers = ref(['api.maclookup.app/v2/macs', 'api.macvendors.com']);
-const selectedServer = ref('api.maclookup.app/v2/macs'); // 默认服务器
+const selectedServer = ref('api.maclookup.app/v2/macs'); // Default server
 
-// 缓存管理
+// Watch for server changes to clear the result
+watch(selectedServer, () => {
+    if (Object.keys(macCheckResult.value).length > 0) {
+        macCheckResult.value = {};
+        // Optional: If you want to automatically search with the new server
+        if (queryMAC.value) {
+            getMacInfo(queryMAC.value);
+        }
+    }
+});
+
+// Cache management
 const cache = {
     get(mac, server) {
         try {
@@ -221,13 +263,18 @@ const cache = {
     }
 };
 
-// 清除缓存
+// Clear cache
 const clearCache = () => {
     cache.clear();
-    errorMsg.value = t('macchecker.CacheCleared') || '缓存已清除';
+    errorMsg.value = t('macchecker.CacheCleared') || 'Cache has been cleared';
+
+    // Fade out error message after 2 seconds
     setTimeout(() => {
         errorMsg.value = '';
     }, 2000);
+
+    // Track event
+    trackEvent('mac_checker', 'clear_cache');
 };
 
 const leftItems = computed(() => {
@@ -251,57 +298,75 @@ const tableItems = computed(() => {
     ];
 });
 
-// 获取 MAC 信息的函数
+// Function to get MAC information
 const getMacInfo = async (mac) => {
     if (!mac) return;
-    
-    // 检查缓存
-    const cachedResult = cache.get(mac, selectedServer.value);
+
+    // Format MAC address (optional)
+    const formattedMac = mac.trim();
+
+    // Check cache
+    const cachedResult = cache.get(formattedMac, selectedServer.value);
     if (cachedResult) {
         macCheckResult.value = cachedResult;
         macCheckResult.value.success = true;
+
+        // Track event - cache hit
+        trackEvent('mac_checker', 'cache_hit', selectedServer.value);
         return;
     }
 
     macCheckStatus.value = 'running';
     errorMsg.value = '';
-    
+
     try {
-        const response = await fetch(`/l-api/mac?q=${encodeURIComponent(mac)}&servers=${selectedServer.value}`);
+        // Track event - search started
+        trackEvent('mac_checker', 'search', selectedServer.value);
+
+        const response = await fetch(`/l-api/mac?q=${encodeURIComponent(formattedMac)}&servers=${selectedServer.value}`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        
+
         if (data.error) {
             errorMsg.value = data.error;
             macCheckResult.value = {};
+
+            // Track event - search error
+            trackEvent('mac_checker', 'search_error', data.error);
         } else {
             const result = data[selectedServer.value] || {};
             macCheckResult.value = result;
             macCheckResult.value.success = true;
-            
-            // 保存到缓存
+
+            // Save to cache
             if (Object.keys(result).length > 0) {
-                cache.set(mac, selectedServer.value, result);
+                cache.set(formattedMac, selectedServer.value, result);
+
+                // Track event - search success
+                trackEvent('mac_checker', 'search_success', selectedServer.value);
             }
         }
     } catch (error) {
         console.error('Error:', error);
-        errorMsg.value = t('macchecker.fetchError');
+        errorMsg.value = t('macchecker.fetchError') || 'Failed to fetch data. Please try again.';
         macCheckResult.value = {};
+
+        // Track event - search exception
+        trackEvent('mac_checker', 'search_exception', error.message);
     } finally {
         macCheckStatus.value = 'idle';
     }
 };
 
-// 提交查询
+// Submit query
 const onSubmit = () => {
     if (!queryMAC.value || macCheckStatus.value === 'running') return;
     getMacInfo(queryMAC.value);
 };
 
-// 获取服务器列表并设置默认值
+// Get server list and set default value
 const fetchServers = async () => {
     try {
         const response = await fetch('/l-api/mac/servers');
@@ -310,29 +375,34 @@ const fetchServers = async () => {
         }
         const data = await response.json();
         availableServers.value = data.servers || availableServers.value;
-        // 确保设置默认服务器
+        // Ensure default server is set
         if (availableServers.value.length > 0 && !selectedServer.value) {
             selectedServer.value = availableServers.value[0];
         }
     } catch (error) {
         console.error('Error fetching servers:', error);
-        errorMsg.value = t('macchecker.serversFetchError');
-        // 如果获取服务器列表失败，使用默认值
+        errorMsg.value = t('macchecker.serversFetchError') || 'Failed to fetch server list';
+        // Use default value if server list fetch fails
         if (!selectedServer.value && availableServers.value.length > 0) {
             selectedServer.value = availableServers.value[0];
         }
     }
 };
 
-// 在组件挂载时获取服务器列表
+// Get servers on component mount
 onMounted(() => {
     fetchServers();
 });
 </script>
 
 <style scoped>
+.mac-checker-section {
+    font-family: var(--bs-font-sans-serif);
+}
+
 .jn-placeholder {
-    height: 16pt;
+    min-height: 50px;
+    transition: all 0.3s ease;
 }
 
 .jn-detail {
@@ -341,15 +411,74 @@ onMounted(() => {
     align-content: flex-start;
     align-items: flex-start;
     flex-wrap: wrap;
-    margin-bottom: 10pt;
+    padding: 0.5rem 0;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .jn-detail {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.jn-detail:last-child {
+    border-bottom: none;
+}
+
+.jn-detail:hover {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+.dark-mode .jn-detail:hover {
+    background-color: rgba(255, 255, 255, 0.02);
 }
 
 .server-options {
     margin-bottom: 1rem;
+    transition: all 0.3s ease;
 }
 
 .jn-number {
     font-family: var(--bs-font-monospace);
     font-size: 0.9rem;
+}
+
+.card {
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animation for loading state */
+.spinner-grow {
+    animation: spinner-grow 0.75s linear infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+
+    .jn-con-title {
+        font-size: 1rem !important;
+    }
+}
+
+/* Flag icon enhancement */
+.jn-fl {
+    display: inline-block;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    width: 24px;
+    height: 18px;
+    background-size: cover;
 }
 </style>
