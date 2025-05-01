@@ -81,7 +81,7 @@
 
                             <!-- Action Buttons -->
                             <div class="action-buttons">
-                                <button class="action-btn" @click="copyCoordinates">
+                                <button class="action-btn copy-btn" @click="copyCoordinates">
                                     <i class="bi bi-clipboard"></i>
                                     {{ t('map.CopyCoordinates') || 'Copy' }}
                                 </button>
@@ -177,8 +177,13 @@ watch(mapProvider, () => {
 const copyCoordinates = () => {
     const text = `${props.location.latitude}, ${props.location.longitude}`;
     navigator.clipboard.writeText(text).then(() => {
-        // You could add a toast notification here
-        console.log('Coordinates copied to clipboard');
+        const copyBtn = document.querySelector('.action-btn.copy-btn');
+        if (copyBtn) {
+            copyBtn.classList.add('copy-success');
+            setTimeout(() => {
+                copyBtn.classList.remove('copy-success');
+            }, 2000);
+        }
     });
 };
 
@@ -404,6 +409,7 @@ defineExpose({
     background-color: white;
     color: #333;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .action-btn:hover {
@@ -418,6 +424,30 @@ defineExpose({
 
 .action-btn.primary:hover {
     background-color: var(--bs-primary-dark, #0b5ed7);
+}
+
+.action-btn.copy-success {
+    background-color: var(--bs-success, #198754);
+    color: white;
+    border-color: var(--bs-success, #198754);
+}
+
+.action-btn.copy-success::after {
+    content: '✓';
+    position: absolute;
+    right: 0.5rem;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Dark Mode Styles */
