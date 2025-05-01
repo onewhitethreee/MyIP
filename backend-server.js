@@ -135,15 +135,15 @@ app.use(express.json());
 
 // APIs
 app.get('/api/map', mapHandler);
-app.get('/api/ipinfo', ipinfoHandler);
-app.get('/api/ipapicom', ipapicomHandler);
-app.get('/api/ipchecking', ipCheckingHandler);
-app.get('/api/ipsb', ipsbHandler);
-app.get('/api/cfradar', cfHander);
+app.get('/api/ipinfo', ipinfoHandler); // ipinfo.io
+app.get('/api/ipapicom', ipapicomHandler); // ip-api.com
+app.get('/api/ipchecking', ipCheckingHandler); // ipcheck-ing.com
+app.get('/api/ipsb', ipsbHandler); // ip.sb
+app.get('/api/cfradar', cfHander); // cloudflare.com
 // app.get('/api/dnsresolver', dnsResolver);
 // app.get('/api/whois', getWhois);
-app.get('/api/ipapiis', ipapiisHandler);
-app.get('/api/ip2location', ip2locationHandler);
+app.get('/api/ipapiis', ipapiisHandler); // ipapi.is
+app.get('/api/ip2location', ip2locationHandler); // ip2location.com
 app.get('/api/invisibility', invisibilitytestHandler);
 // app.get('/api/macchecker', macChecker);
 // app.get('/api/maxmind', maxmindHandler);
