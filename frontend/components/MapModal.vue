@@ -1,3 +1,4 @@
+<!-- Map Modal -->
 <template>
     <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
