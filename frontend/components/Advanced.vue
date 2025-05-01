@@ -1,50 +1,61 @@
 <template>
     <!-- Advanced Tools -->
     <div class="advanced-tools-section mb-4">
-        <div class="jn-title2">
+        <div class="jn-title2 d-flex justify-content-between align-items-center">
             <h2 id="AdvancedTools" :class="{ 'mobile-h2': isMobile }">🧰 {{ t('advancedtools.Title') }}</h2>
+            <button 
+                @click="toggleVisibility" 
+                class="btn btn-sm"
+                :class="[isDarkMode ? 'btn-outline-light' : 'btn-outline-dark']"
+                v-tooltip="{ title: isVisible ? t('advancedtools.Hide') : t('advancedtools.Show'), placement: 'top' }"
+            >
+                <i :class="isVisible ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+            </button>
+        </div>
+        <Transition name="slide-fade">
+            <div v-if="isVisible">
+                <div class="text-secondary">
+                    <p>{{ t('advancedtools.Note') }}</p>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-12 mb-4" v-for="(card, index) in cards.filter(card => card.enabled)"
+                        :key="index">
+                        <div class="jn-adv-card card jn-card" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
+                            <div class="card-body" @click.prevent="navigateAndToggleOffcanvas(card.path)" role="button">
+                                <h3 :class="[isMobile ? 'mobile-h3' : 'fs-4']" class="jn-adv-title">
+                                    <i class="bi bi-arrow-up-right-circle"></i> {{ t(card.titleKey) }}
+                                </h3>
+                                <p class="opacity-75">{{ t(card.noteKey) }}</p>
+                                <span :class="[isDarkMode ? 'jn-icon-dark' : 'jn-icon']">{{ card.icon }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div :data-bs-theme="isDarkMode ? 'dark' : ''" class="offcanvas offcanvas-bottom" tabindex="-1"
+                    :class="[isMobile ? 'h-100' : '']" id="offcanvasTools" aria-labelledby="offcanvasToolsLabel">
+                    <div class="offcanvas-header d-flex justify-content-end jn-offcanvas-header">
+                        <button v-if="!isMobile" type="button" class="btn opacity-50 jn-bold" @click="fullScreen">
+                            <span v-if="!isFullScreen">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </span>
+                            <span v-else>
+                                <i class="bi bi-fullscreen-exit"></i>
+                            </span>
+                        </button>
+                        <span v-if="openedCard >= 0" class="fw-medium"
+                            :class="[isMobile ? 'mobile-h2 text-left' : 'fs-5 text-center ms-auto']">{{
+                            cards[openedCard].icon }}
+                            {{ t(cards[openedCard].titleKey) }}</span>
 
-        </div>
-        <div class="text-secondary">
-            <p>{{ t('advancedtools.Note') }}</p>
-        </div>
-        <div class="row">
-            <div class="col-lg-3 col-md-6 col-12 mb-4" v-for="(card, index) in cards.filter(card => card.enabled)"
-                :key="index">
-                <div class="jn-adv-card card jn-card" :class="{ 'dark-mode dark-mode-border': isDarkMode }">
-                    <div class="card-body" @click.prevent="navigateAndToggleOffcanvas(card.path)" role="button">
-                        <h3 :class="[isMobile ? 'mobile-h3' : 'fs-4']" class="jn-adv-title">
-                            <i class="bi bi-arrow-up-right-circle"></i> {{ t(card.titleKey) }}
-                        </h3>
-                        <p class="opacity-75">{{ t(card.noteKey) }}</p>
-                        <span :class="[isDarkMode ? 'jn-icon-dark' : 'jn-icon']">{{ card.icon }}</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"
+                            @click="resetNavigatorURL()"></button>
+                    </div>
+                    <div class="offcanvas-body pt-0" :class="[isMobile ? ' w-100' : 'jn-canvas-width']" ref="scrollContainer">
+                        <router-view></router-view>
                     </div>
                 </div>
             </div>
-        </div>
-        <div :data-bs-theme="isDarkMode ? 'dark' : ''" class="offcanvas offcanvas-bottom" tabindex="-1"
-            :class="[isMobile ? 'h-100' : '']" id="offcanvasTools" aria-labelledby="offcanvasToolsLabel">
-            <div class="offcanvas-header d-flex justify-content-end jn-offcanvas-header">
-                <button v-if="!isMobile" type="button" class="btn opacity-50 jn-bold" @click="fullScreen">
-                    <span v-if="!isFullScreen">
-                        <i class="bi bi-arrows-fullscreen"></i>
-                    </span>
-                    <span v-else>
-                        <i class="bi bi-fullscreen-exit"></i>
-                    </span>
-                </button>
-                <span v-if="openedCard >= 0" class="fw-medium"
-                    :class="[isMobile ? 'mobile-h2 text-left' : 'fs-5 text-center ms-auto']">{{
-                    cards[openedCard].icon }}
-                    {{ t(cards[openedCard].titleKey) }}</span>
-
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"
-                    @click="resetNavigatorURL()"></button>
-            </div>
-            <div class="offcanvas-body pt-0" :class="[isMobile ? ' w-100' : 'jn-canvas-width']" ref="scrollContainer">
-                <router-view></router-view>
-            </div>
-        </div>
+        </Transition>
     </div>
 
 </template>
@@ -82,6 +93,14 @@ const cards = reactive([
 
 const isFullScreen = ref(false);
 const openedCard = computed(() => store.currentPath.id);
+
+// 添加显示/隐藏状态
+const isVisible = ref(true);
+
+// 添加切换可见性的方法
+const toggleVisibility = () => {
+    isVisible.value = !isVisible.value;
+};
 
 // 跳转到指定页面并打开
 const navigateAndToggleOffcanvas = (routePath) => {
@@ -221,5 +240,23 @@ defineExpose({
 .slide-fade-leave-to {
     transform: translateY(20px);
     opacity: 0;
+}
+
+/* 添加按钮样式 */
+.btn-outline-dark,
+.btn-outline-light {
+    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-dark:hover,
+.btn-outline-light:hover {
+    transform: scale(1.1);
+}
+
+/* 调整标题样式 */
+.jn-title2 {
+    margin-bottom: 1rem;
 }
 </style>
