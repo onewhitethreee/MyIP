@@ -12,7 +12,8 @@
       <p>{{ t('webrtc.Note') }}</p>
     </div>
     <div class="row">
-      <div v-for="stun in stunServers" :key="stun.id" class="col-lg-3 col-md-6 col-12 mb-4">
+      <div v-for="(stun, index) in stunServers" :key="stun.id" class="col-lg-3 col-md-6 col-12 mb-4"
+        :class="{ 'd-none': index >= webrtcServerCount }">
         <div class="card jn-card keyboard-shortcut-card"
           :class="{ 'dark-mode dark-mode-border': isDarkMode, 'jn-hover-card': !isMobile }">
           <div class="card-body">
@@ -72,11 +73,12 @@ const store = useMainStore();
 const isDarkMode = computed(() => store.isDarkMode);
 const isMobile = computed(() => store.isMobile);
 const lang = computed(() => store.lang);
-
+const webrtcServerCount = computed(() => store.userPreferences.webrtcServerCount || 4);
 
 const isStarted = ref(false);
 const IPArray = ref([]);
 const stunServers = reactive([
+  // 原有的服务器
   {
     id: "google",
     name: "Google",
@@ -113,6 +115,43 @@ const stunServers = reactive([
     country: t('webrtc.StatusWait'),
     country_code: '',
   },
+  {
+    id: "microsoft",
+    name: "Microsoft",
+    url: "stun.sipgate.net:3478",
+    ip: t('webrtc.StatusWait'),
+    natType: t('webrtc.StatusWait'),
+    country: t('webrtc.StatusWait'),
+    country_code: '',
+  },
+  {
+    id: "amazon",
+    name: "Amazon",
+    url: "stun.kinesisvideo.us-east-1.amazonaws.com:443",
+    ip: t('webrtc.StatusWait'),
+    natType: t('webrtc.StatusWait'),
+    country: t('webrtc.StatusWait'),
+    country_code: '',
+  },
+  {
+    id: "xiaomi",
+    name: "Xiaomi",
+    url: "stun.miwifi.com:3478",
+    ip: t('webrtc.StatusWait'),
+    natType: t('webrtc.StatusWait'),
+    country: t('webrtc.StatusWait'),
+    country_code: '',
+  },
+  {
+    id: "nextCloud",
+    name: "NextCloud",
+    url: "stun.nextcloud.com:3478",
+    ip: t('webrtc.StatusWait'),
+    natType: t('webrtc.StatusWait'),
+    country: t('webrtc.StatusWait'),
+    country_code: '',
+  }
+  
 ]);
 
 
@@ -221,7 +260,8 @@ const checkAllWebRTC = async (isRefresh) => {
     trackEvent('Section', 'RefreshClick', 'WebRTC');
   }
   isStarted.value = true;
-  const promises = stunServers.map((server) => {
+  const visibleServers = stunServers.slice(0, webrtcServerCount.value);
+  const promises = visibleServers.map((server) => {
     server.ip = t('webrtc.StatusWait');
     server.natType = t('webrtc.StatusWait');
     server.country = t('webrtc.StatusWait');
@@ -235,7 +275,6 @@ const checkAllWebRTC = async (isRefresh) => {
   return Promise.race([allSettledPromise, timeoutPromise]).then(() => {
     store.setLoadingStatus('webrtc', true);
   });
-
 };
 
 onMounted(() => {

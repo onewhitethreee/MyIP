@@ -167,6 +167,8 @@
       "connectivityAutoRefreshTips": "When enabled, the app runs five checks at startup and displays the lowest latency.",
       "popupConnectivityNotifications": "Pop-up Connectivity Alerts",
       "popupConnectivityNotificationsTips": "When enabled, the initial check's results are shown as a pop-up alert.",
+      "webrtcServerCount": "WebRTC Server Count",
+      "webrtcServerCountTips": "Toggle between 4 or 8 WebRTC servers for testing. More servers provide more comprehensive results but take longer to complete.",
       "ipDB": "IP Geolocation Database",
       "ipDBTips": "You can select the default IP geolocation source to use. If the selected source is unavailable, the system will use the subsequent sources in order.",
       "language": "Language Setting",

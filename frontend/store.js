@@ -167,6 +167,7 @@ export const useMainStore = defineStore('main', {
         ipCardsToShow: 6,
         ipGeoSource: 0,
         lang: 'auto',
+        webrtcServerCount: 4, // 4 or 8 servers
       };
       const storedPreferences = localStorage.getItem('userPreferences');
       let preferencesToStore;

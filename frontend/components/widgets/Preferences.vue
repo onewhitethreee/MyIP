@@ -194,6 +194,22 @@
                         </div>
                     </li>
 
+                    <li class="list-group-item d-flex justify-content-between align-items-start"
+                        :class="[isDarkMode ? 'border-light' : 'border-dark']">
+                        <div class="me-auto">
+                            <div class="fw-bold"><label class="form-check-label" for="WebRTCServerCount">{{
+                                    t('nav.preferences.webrtcServerCount') }}</label>
+                            </div>
+                            <div class="preferences-tip">{{ t('nav.preferences.webrtcServerCountTips') }}</div>
+                        </div>
+                        <div class="form-check form-switch col-auto">
+                            <input class="form-check-input" :class="[isDarkMode ? 'jn-check-dark' : 'jn-check-light']"
+                                type="checkbox" role="switch" id="WebRTCServerCount"
+                                :checked="userPreferences.webrtcServerCount === 8"
+                                @change="prefWebRTCServerCount($event.target.checked)">
+                        </div>
+                    </li>
+
                 </ul>
             </div>
 
@@ -328,6 +344,11 @@ const prefipGeoSource = (value) => {
 const toggleMaps = () => {
     store.updatePreference('showMap', !userPreferences.value.showMap);
     trackEvent('Nav', 'ToggleClick', 'ShowMap');
+};
+
+const prefWebRTCServerCount = (value) => {
+    store.updatePreference('webrtcServerCount', value ? 8 : 0);
+    trackEvent('Nav', 'PrefereceClick', 'WebRTCServerCount');
 };
 
 onMounted(() => {
