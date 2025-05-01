@@ -546,9 +546,10 @@
   "webrtc": {
     "id": "webrtc",
     "Title": "WebRTC 测试",
-    "Note": "WebRTC 往往通过 UDP 直连进行建立，如果测试返回了真实 IP，则意味着你的代理设置没有覆盖这些连接。除了检测你连接 WebRTC 时所使用的 IP，我们还会检测你的 NAT 类型。然而，NAT 类型的检测并不是 100% 准确的，仅供参考。",
-    "StatusWait": "待检测或连接错误",
-    "StatusError": "测试出错",
+    "Note": "WebRTC 通常通过 UDP 直接建立连接。如果测试返回您的真实 IP，这意味着您的代理设置没有覆盖这些连接。除了检测您连接 WebRTC 时使用的 IP 外，我们还检测您的 NAT 类型。但请注意，NAT 类型检测并非 100% 准确，仅供参考。",
+    "StatusWait": "等待测试或连接错误",
+    "StatusError": "测试错误",
+    "IPLeakWarning": "警告：检测到 WebRTC IP 泄露！通过 WebRTC 获取的 IP 地址与您的主 IP 地址不同。这可能表明您的代理/VPN 设置没有正确配置 WebRTC 连接。",
     "NATType": {
       "srflx": "端口限制型或对称型",
       "prflx": "端口限制型",

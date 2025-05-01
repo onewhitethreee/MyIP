@@ -11,6 +11,10 @@
     <div class="text-secondary">
       <p>{{ t('webrtc.Note') }}</p>
     </div>
+    <div v-if="isIPLeaked" class="alert alert-warning mb-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      {{ t('webrtc.IPLeakWarning') }}
+    </div>
     <div class="row">
       <div v-for="(stun, index) in stunServers" :key="stun.id" class="col-lg-3 col-md-6 col-12 mb-4"
         :class="{ 'd-none': index >= webrtcServerCount }">
@@ -74,9 +78,11 @@ const isDarkMode = computed(() => store.isDarkMode);
 const isMobile = computed(() => store.isMobile);
 const lang = computed(() => store.lang);
 const webrtcServerCount = computed(() => store.userPreferences.webrtcServerCount || 4);
+const mainIP = computed(() => store.allIPs[0]); // 获取主IP地址
 
 const isStarted = ref(false);
 const IPArray = ref([]);
+const isIPLeaked = ref(false);
 const stunServers = reactive([
   // 原有的服务器
   {
@@ -277,12 +283,25 @@ const checkAllWebRTC = async (isRefresh) => {
   });
 };
 
+// 检查IP是否泄露
+const checkIPLeak = () => {
+  if (!mainIP.value) return;
+  
+  const stunIPs = stunServers
+    .slice(0, webrtcServerCount.value)
+    .map(server => server.ip)
+    .filter(ip => ip !== t('webrtc.StatusWait') && ip !== t('webrtc.StatusError'));
+  
+  isIPLeaked.value = stunIPs.some(ip => ip !== mainIP.value);
+};
+
 onMounted(() => {
   store.setMountingStatus('webrtc', true);
 });
 
 watch(IPArray, () => {
   store.updateAllIPs(IPArray.value);
+  checkIPLeak();
 }, { deep: true });
 
 defineExpose({
