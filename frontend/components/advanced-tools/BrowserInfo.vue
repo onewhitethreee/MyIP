@@ -234,7 +234,7 @@
                                                         </div>
                                                     </span>
                                                 </div>
-                                                <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.locale">
+                                                <!-- <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.locale">
                                                     <span>
                                                         {{ t('browserinfo.browser.locale') }}
                                                     </span>
@@ -245,7 +245,7 @@
                                                             <small class="text-muted">{{ otherInfos.cpuInfo.system.locale.languages.join(', ') }}</small>
                                                         </div>
                                                     </span>
-                                                </div>
+                                                </div> -->
                                                 <div class="jn-detail" v-if="otherInfos.cpuInfo?.system?.connection">
                                                     <span>
                                                         {{ t('browserinfo.browser.connection') }}
