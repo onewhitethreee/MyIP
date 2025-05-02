@@ -576,7 +576,8 @@
     "StatusWait": "待检测",
     "StatusError": "测试出错",
     "Hide": "隐藏",
-    "Show": "显示"
+    "Show": "显示",
+    "UseEightCards": "进行 8 次测试"
   },
   "speedtest": {
     "id": "speedtest",

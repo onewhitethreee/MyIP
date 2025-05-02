@@ -566,7 +566,8 @@
     "Endpoint": "DNS Endpoint",
     "EndpointCountry": "Endpoint Region",
     "StatusWait": "Awaiting Test",
-    "StatusError": "Test Error"
+    "StatusError": "Test Error",
+    "UseEightCards": "Perform 8 tests"
   },
   "speedtest": {
     "id": "speedtest",
