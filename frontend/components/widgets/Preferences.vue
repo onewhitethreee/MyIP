@@ -63,51 +63,7 @@
                 </div>
             </div>
 
-            <!-- IP 源 -->
-
-            <div id="Pref_ipCards">
-                <div class="form-label col-12 preferences-title">
-                    <i class="bi bi-ui-checks-grid"></i> {{ t('nav.preferences.ipSourcesToCheck') }}
-                </div>
-                <div class="btn-group col-auto w-50 mb-2" role="group" aria-label="ipCards">
-                    <input v-for="num in [3, 6]" :key="'input-'+num"
-                        v-model="userPreferences.ipCardsToShow" type="radio" class="btn-check"
-                        :name="'ipCards_' + num" :id="'ipCards_' + num" autocomplete="off" :value=num
-                        @change="prefipCards(num)">
-                    <label v-for="num in [3, 6]" :key="'label-'+num"
-                        class="btn jn-number" :class="{
-                        'btn-outline-dark': !isDarkMode,
-                        'btn-outline-light': isDarkMode,
-                        'active fw-bold': userPreferences.ipCardsToShow === num
-                    }" :for="'ipCards_' + num">{{ num }}</label>
-                </div>
-                <div class="preferences-tip">{{ t('nav.preferences.ipSourcesToCheckTips') }}</div>
-            </div>
-
-            <!-- IP 地理位置数据库 -->
-
-            <div id="Pref_ipGeoSource">
-                <div class="form-label col-12 preferences-title">
-                    <i class="bi bi-ui-checks-grid"></i> {{ t('nav.preferences.ipDB') }}
-                </div>
-                <div class="btn-group-vertical col-auto w-50 mb-2" role="group" aria-label="ipGeoSource">
-                    <input v-for="ipdb in ipDBs" :key="'input-'+ipdb.id"
-                        v-model="userPreferences.ipGeoSource" type="radio" class="btn-check"
-                        :name="'ipGeoSource_' + ipdb.text" :id="'ipGeoSource_' + ipdb.id" autocomplete="off"
-                        :value=ipdb.id @change="prefipGeoSource(ipdb.id)">
-                    <label v-for="ipdb in ipDBs" :key="'label-'+ipdb.id"
-                        class="btn jn-number text-start" :class="{
-                        'btn-outline-dark': !isDarkMode,
-                        'btn-outline-light': isDarkMode,
-                        'active fw-bold': userPreferences.ipGeoSource === ipdb.id,
-                        'jn-disabled-button': !ipdb.enabled
-                    }" :for="'ipGeoSource_' + ipdb.id" :aria-disabled="!ipdb.enabled" :aria-label="ipdb.text">
-                        <span :class="[ipdb.enabled ? '' : 'jn-disabled-text']">{{ ipdb.text }}&nbsp;</span>
-                        <i class="bi bi-check2-circle" v-if="userPreferences.ipGeoSource === ipdb.id"></i>
-                    </label>
-                </div>
-                <div class="preferences-tip">{{ t('nav.preferences.ipDBTips') }}</div>
-            </div>
+            
 
             <!-- 应用设置 -->
 
@@ -330,16 +286,8 @@ const prefconnectivityShowNoti = (value) => {
     trackEvent('Nav', 'PrefereceClick', 'ConnectivityNotifications');
 };
 
-const prefipCards = (value) => {
-    store.updatePreference('ipCardsToShow', value);
-    trackEvent('Nav', 'PrefereceClick', 'ipCards');
-};
 
-const prefipGeoSource = (value) => {
-    store.updatePreference('ipGeoSource', value);
-    trackEvent('Nav', 'PrefereceClick', 'ipGeoSource');
-    trackEvent('IPCheck', 'SelectSource', ipDBs.value.find(x => x.id === value).text);
-};
+
 
 const toggleMaps = () => {
     store.updatePreference('showMap', !userPreferences.value.showMap);
