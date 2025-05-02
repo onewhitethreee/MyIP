@@ -1,61 +1,67 @@
 <template>
-  <!-- Nav -->
-  <header class="navbar navbar-expand-lg bg-body-tertiary mb-3 jn-navbar-top "
-    :class="{ 'dark-mode-nav navbar-dark bg-dark': isDarkMode }">
-    <nav id="navbar-top" class="container-xxl">
-      <button class="navbar-toggler jn-hamburger-button" type="button" data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
-        <span class="navbar-toggler-icon bg-transparent"></span>
-      </button>
+  <div>
+    <!-- Nav -->
+    <header class="navbar navbar-expand-lg bg-body-tertiary mb-3 jn-navbar-top "
+      :class="{ 'dark-mode-nav navbar-dark bg-dark': isDarkMode }">
+      <nav id="navbar-top" class="container-xxl">
+        <button class="navbar-toggler jn-hamburger-button" type="button" data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+          <span class="navbar-toggler-icon bg-transparent"></span>
+        </button>
 
-      <div class="jn-logo">
-        <a class="navbar-brand d-flex align-items-center align-content-center" :class="{ 'text-white': isDarkMode }"
-          href="#" @click="handleLogoClick">
-          <brandIcon />
-          <span class=" fw-bold  "> IP</span>
-          <span class="fw-lighter">Check.</span>
-          <span class="fw-lighter" :class="{
-              'background-animation-dark': !loaded && isDarkMode,
-              'background-animation-light': !loaded && !isDarkMode
-            }">ing
-          </span>
-        </a>
-      </div>
-
-      <!-- Menu Bar, Expand on PC -->
-      <div :data-bs-theme="isDarkMode ? 'dark' : ''" class="offcanvas offcanvas-bottom"
-        :class="[isMobile ? 'h-50' : '']" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title">{{t('nav.Navigation')}}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body" :class="[!isMobile ? 'd-flex align-items-center' : '']">
-          <div class="navbar-nav">
-            <a type="button"
-              v-for="item in ['IPInfo', 'Connectivity', 'WebRTC', 'DNSLeakTest', 'SpeedTest', 'AdvancedTools']"
-              :key="item" class="nav-link" :class="{ 
-                'text-white': item === currentSection && isDarkMode,
-                'text-dark': item === currentSection && !isDarkMode,
-                }" @click="scrollToSection(item) ; trackEvent('Nav', 'NavClick', item)">
-              {{ t(`nav.${item}`) }}
-            </a>
-          </div>
-          <a :class="[isMobile ? 'mt-2':'ms-2']" :href="t('page.footerLink')" target="_blank"
-            class="d-flex align-items-center">
-            <img src="https://img.shields.io/github/stars/jason5ng32/MyIP" />
+        <div class="jn-logo">
+          <a class="navbar-brand d-flex align-items-center align-content-center" :class="{ 'text-white': isDarkMode }"
+            href="#" @click="handleLogoClick">
+            <brandIcon />
+            <span class=" fw-bold  "> IP</span>
+            <span class="fw-lighter">Check.</span>
+            <span class="fw-lighter" :class="{
+                'background-animation-dark': !loaded && isDarkMode,
+                'background-animation-light': !loaded && !isDarkMode
+              }">ing
+            </span>
           </a>
         </div>
-      </div>
 
-      <div id="Preferences" class="preference-button" @click.prevent="OpenPreferences" role="button"
-        aria-label="Preferences">
-        <i class="bi bi-toggles"></i>
-      </div>
+        <!-- Menu Bar, Expand on PC -->
+        <div :data-bs-theme="isDarkMode ? 'dark' : ''" class="offcanvas offcanvas-bottom"
+          :class="[isMobile ? 'h-50' : '']" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title">{{t('nav.Navigation')}}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body" :class="[!isMobile ? 'd-flex align-items-center' : '']">
+            <div class="navbar-nav">
+              <a type="button"
+                v-for="item in ['IPInfo', 'Connectivity', 'WebRTC', 'DNSLeakTest', 'SpeedTest', 'AdvancedTools']"
+                :key="item" class="nav-link" :class="{ 
+                  'text-white': item === currentSection && isDarkMode,
+                  'text-dark': item === currentSection && !isDarkMode,
+                  }" @click="scrollToSection(item) ; trackEvent('Nav', 'NavClick', item)">
+                {{ t(`nav.${item}`) }}
+              </a>
+            </div>
+            <a :class="[isMobile ? 'mt-2':'ms-2']" :href="t('page.footerLink')" target="_blank"
+              class="d-flex align-items-center">
+              <img src="https://img.shields.io/github/stars/jason5ng32/MyIP" />
+            </a>
+          </div>
+        </div>
 
-      
-    </nav>
-  </header>
+        <div id="Preferences" class="preference-button" @click.prevent="OpenPreferences" role="button"
+          aria-label="Preferences">
+          <i class="bi bi-toggles"></i>
+        </div>
 
+        <div class="login-button ms-2" @click="openAuthModal" role="button" aria-label="Login">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        
+      </nav>
+    </header>
+
+    <AuthModal v-if="showAuthModal" :show="showAuthModal" @close="closeAuthModal" />
+  </div>
 </template>
 
 <script setup>
@@ -65,6 +71,7 @@ import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
 import { Offcanvas } from 'bootstrap';
 import unixToDateTime from '@/utils/timestamp-to-date';
+import AuthModal from './AuthModal.vue';
 
 const { t } = useI18n();
 
@@ -132,6 +139,18 @@ const scrollToSection = (el, offset = 70) => {
   window.scrollTo({ top: y, behavior: "smooth" });
 }
 
+// Auth Modal
+const showAuthModal = ref(false);
+
+const openAuthModal = () => {
+  showAuthModal.value = true;
+  trackEvent('Nav', 'NavClick', 'Login');
+};
+
+const closeAuthModal = () => {
+  showAuthModal.value = false;
+};
+
 watch(() => store.allHasLoaded, (newValue) => {
   loaded.value = newValue;
 });
@@ -157,6 +176,16 @@ defineExpose({
 
 .preference-button {
   margin-left: 8pt;
+}
+
+.login-button {
+  margin-left: 8pt;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.login-button:hover {
+  opacity: 0.8;
 }
 
 .container-xxl {
