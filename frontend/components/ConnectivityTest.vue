@@ -61,11 +61,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, watch } from 'vue';
+import { ref, computed, onMounted, reactive, watch, onUnmounted } from 'vue';
 import { useMainStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { trackEvent } from '@/utils/use-analytics';
-
 
 const { t } = useI18n();
 
@@ -74,18 +73,19 @@ const isDarkMode = computed(() => store.isDarkMode);
 const isMobile = computed(() => store.isMobile);
 const userPreferences = computed(() => store.userPreferences);
 
-const alertCrontrol = ref(false);
 const alertToShow = ref(false);
 const alertStyle = ref("");
 const alertTitle = ref("");
 const alertMessage = ref("");
-const autoRefresh = ref(userPreferences.value.connectivityAutoRefresh);
-const autoShowAltert = ref(userPreferences.value.popupConnectivityNotifications);
+const autoRefresh = computed(() => userPreferences.value.connectivityAutoRefresh);
+const autoShowAltert = computed(() => userPreferences.value.popupConnectivityNotifications);
 const isStarted = ref(false);
 const counter = ref(0);
 const maxCounts = ref(5);
 const manualRun = ref(false);
-const intervalId = ref(3000);
+const refreshIntervalId = ref(null);
+const isVisible = ref(true);
+
 const connectivityTests = reactive([
   {
     id: "taobao",
@@ -161,9 +161,6 @@ const connectivityTests = reactive([
   },
 ]);
 
-// 添加显示/隐藏状态
-const isVisible = ref(true);
-
 // 添加切换可见性的方法
 const toggleVisibility = () => {
   isVisible.value = !isVisible.value;
@@ -177,7 +174,7 @@ const checkConnectivityHandler = (test, onTestComplete = () => { }, isManualRun)
   let timeout = setTimeout(() => {
     test.status = t('connectivity.StatusUnavailable');
     onTestComplete(false);
-  }, 3 * 1200);
+  }, 2000); // 减少超时时间到2秒
 
   img.onload = () => {
     clearTimeout(timeout);
@@ -211,7 +208,7 @@ const checkConnectivityHandler = (test, onTestComplete = () => { }, isManualRun)
 // 检查所有网络连通性
 const checkAllConnectivity = (isAlertToShow, isRefresh, isManualRun) => {
   alertToShow.value = isAlertToShow;
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (isRefresh) {
       connectivityTests.forEach((test) => {
         test.status = t('connectivity.StatusWait');
@@ -222,14 +219,12 @@ const checkAllConnectivity = (isAlertToShow, isRefresh, isManualRun) => {
 
     let totalTests = connectivityTests.length;
     let successCount = 0;
-    let completedCount = 0;
     let testPromises = [];
 
     const onTestComplete = (isSuccess) => {
       if (isSuccess) {
         successCount++;
       }
-      completedCount++;
     };
 
     connectivityTests.forEach((test, index) => {
@@ -259,17 +254,9 @@ const checkAllConnectivity = (isAlertToShow, isRefresh, isManualRun) => {
       resolve();
     });
 
-
     isStarted.value = true;
   });
 };
-
-const sendAlert = () => {
-  if ((alertToShow.value || !isStarted.value) && autoShowAltert.value) {
-    store.setAlert(alertToShow.value, alertStyle.value, alertMessage.value, alertTitle.value);
-  }
-};
-
 
 // 更新通知气泡
 const updateConnectivityAlert = (type) => {
@@ -282,24 +269,43 @@ const updateConnectivityAlert = (type) => {
     alertMessage.value = t('alert.OhNo_Message');
     alertTitle.value = t('alert.OhNo');
   }
+  sendAlert();
+};
+
+const sendAlert = () => {
+  if ((alertToShow.value || !isStarted.value) && autoShowAltert.value) {
+    store.setAlert(alertToShow.value, alertStyle.value, alertMessage.value, alertTitle.value);
+  }
 };
 
 // 主控制函数
 const handelCheckStart = async (fromApp = false) => {
+  // 重置计数器
+  counter.value = 0;
+
   if (fromApp) {
-    await checkAllConnectivity(false, true, true);
+    await checkAllConnectivity(false, true, false);
   } else {
     await checkAllConnectivity(true, false, false);
   }
+
   // 传递完成状态到 store
   store.setLoadingStatus('connectivity', true);
+
+  // 清除之前的定时器
+  if (refreshIntervalId.value) {
+    clearInterval(refreshIntervalId.value);
+    refreshIntervalId.value = null;
+  }
+
   if (autoRefresh.value) {
-    intervalId.value = setInterval(async () => {
+    refreshIntervalId.value = setInterval(async () => {
       if (counter.value < maxCounts.value && !manualRun.value) {
         await checkAllConnectivity(false, false, false);
         counter.value++;
       } else {
-        clearInterval(intervalId.value);
+        clearInterval(refreshIntervalId.value);
+        refreshIntervalId.value = null;
       }
     }, 3000);
   }
@@ -309,9 +315,16 @@ onMounted(() => {
   store.setMountingStatus('connectivity', true);
 });
 
-watch(() => store.allHasLoaded, (newValue, oldValue) => {
+watch(() => store.allHasLoaded, (newValue) => {
   if (newValue === true) {
     sendAlert();
+  }
+});
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (refreshIntervalId.value) {
+    clearInterval(refreshIntervalId.value);
   }
 });
 
@@ -319,43 +332,98 @@ defineExpose({
   checkAllConnectivity,
   handelCheckStart,
 });
-
 </script>
-<style scoped>
-.jn-text-warning {
-  color: #c67c14;
-}
 
-/* 添加按钮样式 */
-.btn-outline-dark,
-.btn-outline-light {
-  padding: 0.25rem 0.5rem;
-  border-radius: 50%;
+<style scoped>
+.availability-test-section {
   transition: all 0.3s ease;
 }
 
-.btn-outline-dark:hover,
-.btn-outline-light:hover {
-  transform: scale(1.1);
-}
-
-/* 调整标题样式 */
-.jn-title2 {
-  margin-bottom: 1rem;
-}
-
-/* 添加动画样式 */
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
+.slide-fade-enter-active,
 .slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+  transition: all 0.3s ease;
 }
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
-  transform: translateY(-20px);
   opacity: 0;
+  transform: translateY(-20px);
+}
+
+.jn-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.jn-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode {
+  background-color: #2c2c2c;
+  color: #ffffff;
+}
+
+.dark-mode-border {
+  border-color: #404040;
+}
+
+.jn-con-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.jn-con-title i {
+  font-size: 1.2rem;
+}
+
+.card-text {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.jn-text-warning {
+  color: #ffc107;
+}
+
+.dark-mode-refresh {
+  background-color: #404040;
+  border-color: #505050;
+}
+
+.dark-mode-refresh:hover {
+  background-color: #505050;
+}
+
+@media (max-width: 768px) {
+  .mobile-h2 {
+    font-size: 1.5rem;
+  }
+  
+  .jn-card {
+    margin-bottom: 1rem;
+  }
+  
+  .card-text {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .col-6 {
+    width: 100%;
+  }
 }
 </style>
+
+
