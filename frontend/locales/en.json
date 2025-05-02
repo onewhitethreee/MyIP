@@ -361,7 +361,8 @@
       "title": "WebRTC Detection",
       "proxy": "WebRTC detected multiple IP addresses from different regions, indicating that you may be using a proxy or VPN.",
       "ipsAre": "The IP addresses are: ",
-      "notProxy": "No evidence of multiple IP addresses from different regions was found in WebRTC detection."
+      "notProxy": "No evidence of multiple IP addresses from different regions was found in WebRTC detection.",
+      "Hide": "Hide"
     },
     "flow": {
       "title": "Traffic Analysis",
@@ -393,7 +394,8 @@
     "InvisibilityTest": "Check if you are using a proxy or VPN",
     "MacChecker": "Query information of a physical address",
     "BrowserInfo": "Check browser information and fingerprint",
-    "SecurityChecklist": "Guide to securing your digital life"
+    "SecurityChecklist": "Guide to securing your digital life",
+    "Hide": "Hide"
   },
   "macchecker": {
     "Title": "MAC Lookup",
@@ -540,7 +542,8 @@
     "StatusTimeout": "Timeout or Unavailable",
     "checking": "Checking...",
     "minTestTime": "Min Test Time: ",
-    "RefreshThisTest": "Refresh This Test"
+    "RefreshThisTest": "Refresh This Test",
+    "Hide": "Hide"
   },
   "webrtc": {
     "id": "webrtc",
@@ -567,7 +570,9 @@
     "EndpointCountry": "Endpoint Region",
     "StatusWait": "Awaiting Test",
     "StatusError": "Test Error",
-    "UseEightCards": "Perform 8 tests"
+    "UseEightCards": "Perform 8 tests",
+    "StatusTimeout": "Timeout",
+    "Hide": "Hide"
   },
   "speedtest": {
     "id": "speedtest",
@@ -592,7 +597,9 @@
       "Good": "Good",
       "Medium": "Medium",
       "Bad": "Bad"
-    }
+    },
+    "Time": "Time",
+    "Hide": "Hide"
   },
   "pingtest": {
     "id": "pingtest",
@@ -1178,6 +1185,23 @@
     "OpenStreetMap": "OpenStreetMap",
     "BaiduMaps": "Baidu Maps",
     "CopyCoordinates": "Copy Coordinates",
-    "GetDirections": "Get Directions"
+    "GetDirections": "Get Directions",
+    "LoadingMap": "Loading map..."
+  },
+  "auth": {
+    "forgotPasswordInstructions": "Enter your email address and we will send you instructions to reset your password.",
+    "login": "Login",
+    "email": "Email",
+    "forgotPassword": "Forgot Password",
+    "orLoginWith": "Or login with",
+    "noAccount": "No account?",
+    "register": "Register",
+    "password": "Password",
+    "registerNow": "Register Now",
+    "name": "Name",
+    "confirmPassword": "Confirm Password",
+    "alreadyHaveAccount": "Already have an account?",
+    "backToLogin": "Back to Login",
+    "resetPassword": "Reset Password"
   }
 }

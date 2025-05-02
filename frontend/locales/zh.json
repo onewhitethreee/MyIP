@@ -577,7 +577,8 @@
     "StatusError": "测试出错",
     "Hide": "隐藏",
     "Show": "显示",
-    "UseEightCards": "进行 8 次测试"
+    "UseEightCards": "进行 8 次测试",
+    "StatusTimeout": "超时"
   },
   "speedtest": {
     "id": "speedtest",
@@ -604,7 +605,8 @@
       "Bad": "较差"
     },
     "Hide": "隐藏",
-    "Show": "显示"
+    "Show": "显示",
+    "Time": "时间"
   },
   "pingtest": {
     "id": "pingtest",
@@ -1190,6 +1192,23 @@
     "OpenStreetMap": "开放街图",
     "BaiduMaps": "百度地图",
     "CopyCoordinates": "复制坐标",
-    "GetDirections": "获取路线"
+    "GetDirections": "获取路线",
+    "LoadingMap": "正在加载地图..."
+  },
+  "auth": {
+    "forgotPasswordInstructions": "输入您的电子邮件地址，我们将发送指示重置您的密码。",
+    "login": "登录",
+    "email": "电子邮件",
+    "forgotPassword": "忘记密码",
+    "orLoginWith": "或使用以下方式登录",
+    "noAccount": "没有账户？",
+    "register": "注册",
+    "password": "密码",
+    "registerNow": "立即注册",
+    "name": "姓名",
+    "confirmPassword": "确认密码",
+    "alreadyHaveAccount": "已经有账户？",
+    "backToLogin": "返回登录",
+    "resetPassword": "重置密码"
   }
 }
