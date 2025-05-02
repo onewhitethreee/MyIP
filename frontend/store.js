@@ -1,7 +1,7 @@
 // store.js
 import { defineStore } from 'pinia';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from './firebase-init.js';
+// import { auth } from './firebase-init.js';
 import i18n from './locales/i18n';
 const { t } = i18n.global;
 
@@ -55,7 +55,7 @@ export const useMainStore = defineStore('main', {
       ipv6Domain: import.meta.env.VITE_CURL_IPV6_DOMAIN,
       ipv64Domain: import.meta.env.VITE_CURL_IPV64_DOMAIN,
     },
-    isFireBaseSet: false,
+    isFireBaseSet: false, // 是否设置 Firebase
     loadingStatus: {
       ipcheck: false,
       connectivity: false,
@@ -201,65 +201,65 @@ export const useMainStore = defineStore('main', {
       this.currentSection = section;
     },
     // 检查 Firebase 环境
-    checkFirebaseEnv() {
-      const envConfigs = {
-        key: import.meta.env.VITE_FIREBASE_API_KEY,
-        domain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        project: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-      }
-      this.isFireBaseSet = !!envConfigs.key && !!envConfigs.domain && !!envConfigs.project;
-    },
-    // 通过 Google 登录
-    async signInWithGoogle() {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      try {
-        const result = await signInWithPopup(auth, provider);
-        this.user = result.user;
-        // 登录成功后刷新浏览器
-        window.location.reload();
-      } catch (error) {
-        this.alert = { alertToShow: true, alertStyle: "text-danger", alertMessage: t('alert.SignInFailedReason') + ' : ' + error, alertTitle: t('alert.SignInFailed') };
-        console.error("Google sign-in failed:", error);
-      }
-    },
-    // 通过 GitHub 登录
-    async signInWithGithub() {
-      const provider = new GithubAuthProvider();
-      provider.addScope('user:email');
-      try {
-        const result = await signInWithPopup(auth, provider);
-        this.user = result.user;
-        // 登录成功后刷新浏览器
-        window.location.reload();
-      } catch (error) {
-        this.alert = { alertToShow: true, alertStyle: "text-danger", alertMessage: t('alert.SignInFailedReason') + ' : ' + error, alertTitle: t('alert.SignInFailed') };
-        console.error("GitHub sign-in failed:", error);
-      }
-    },
-    // 退出登录
-    async signOut() {
-      try {
-        await firebaseSignOut(auth);
-        this.user = null;
-        this.isSignedIn = false;
-      } catch (error) {
-        console.error("Sign out failed:", error);
-      }
-    },
+    // checkFirebaseEnv() {
+    //   const envConfigs = {
+    //     key: import.meta.env.VITE_FIREBASE_API_KEY,
+    //     domain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    //     project: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    //   }
+    //   this.isFireBaseSet = !!envConfigs.key && !!envConfigs.domain && !!envConfigs.project;
+    // },
+    // // 通过 Google 登录
+    // async signInWithGoogle() {
+    //   const provider = new GoogleAuthProvider();
+    //   provider.addScope('email');
+    //   try {
+    //     const result = await signInWithPopup(auth, provider);
+    //     this.user = result.user;
+    //     // 登录成功后刷新浏览器
+    //     window.location.reload();
+    //   } catch (error) {
+    //     this.alert = { alertToShow: true, alertStyle: "text-danger", alertMessage: t('alert.SignInFailedReason') + ' : ' + error, alertTitle: t('alert.SignInFailed') };
+    //     console.error("Google sign-in failed:", error);
+    //   }
+    // },
+    // // 通过 GitHub 登录
+    // async signInWithGithub() {
+    //   const provider = new GithubAuthProvider();
+    //   provider.addScope('user:email');
+    //   try {
+    //     const result = await signInWithPopup(auth, provider);
+    //     this.user = result.user;
+    //     // 登录成功后刷新浏览器
+    //     window.location.reload();
+    //   } catch (error) {
+    //     this.alert = { alertToShow: true, alertStyle: "text-danger", alertMessage: t('alert.SignInFailedReason') + ' : ' + error, alertTitle: t('alert.SignInFailed') };
+    //     console.error("GitHub sign-in failed:", error);
+    //   }
+    // },
+    // // 退出登录
+    // async signOut() {
+    //   try {
+    //     await firebaseSignOut(auth);
+    //     this.user = null;
+    //     this.isSignedIn = false;
+    //   } catch (error) {
+    //     console.error("Sign out failed:", error);
+    //   }
+    // },
     // 初始化 Auth 监听
-    initializeAuthListener() {
-      return new Promise((resolve) => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-          this.user = currentUser;
-          if (currentUser) {
-            this.isSignedIn = true;
-          }
-          unsubscribe(); // 获取到用户状态后立即取消订阅
-          resolve();
-        });
-      });
-    },
+    // initializeAuthListener() {
+    //   return new Promise((resolve) => {
+    //     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    //       this.user = currentUser;
+    //       if (currentUser) {
+    //         this.isSignedIn = true;
+    //       }
+    //       unsubscribe(); // 获取到用户状态后立即取消订阅
+    //       resolve();
+    //     });
+    //   });
+    // },
     // 触发打开成就
     setTriggerAchievements(value) {
       this.triggerAchievements = value;

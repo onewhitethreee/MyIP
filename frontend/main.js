@@ -81,7 +81,7 @@ app.directive('tooltip', {
 })
 
 // 检查 Firebase 环境
-store.checkFirebaseEnv();
+// store.checkFirebaseEnv();
 
 // 获取后端配置和用户偏好
 Promise.all([
