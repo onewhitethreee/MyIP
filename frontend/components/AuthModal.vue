@@ -1,3 +1,4 @@
+<!-- Login and Register Modal -->
 <template>
     <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true"
         data-bs-backdrop="static">
@@ -13,7 +14,7 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="auth-forms-container">
-                        <!-- Removed transition component -->
+                        <!-- Login Form -->
                         <form v-if="currentForm === 'login'" @submit.prevent="handleLogin" class="auth-form"
                             key="login">
                             <div class="mb-4">
@@ -26,6 +27,7 @@
                                         v-model="loginForm.email" required placeholder="your@email.com">
                                 </div>
                             </div>
+                            <!-- Password Input -->
                             <div class="mb-4">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label for="loginPassword" class="form-label fw-medium mb-0">{{
@@ -35,6 +37,7 @@
                                         {{ t('auth.forgotPassword') }}
                                     </a>
                                 </div>
+                                <!-- Password Input Group -->
                                 <div class="input-group mt-2">
                                     <span class="input-group-text bg-light border-end-0">
                                         <i class="bi bi-lock"></i>
@@ -48,10 +51,12 @@
                                     </span>
                                 </div>
                             </div>
+                            <!-- Login Button -->
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-medium shadow-sm">
                                 {{ t('auth.login') }}
                             </button>
 
+                            <!-- Social Login -->
                             <div class="mt-4 text-center">
                                 <div class="divider">
                                     <span class="divider-text">{{ t('auth.orLoginWith') }}</span>
@@ -69,6 +74,7 @@
                                     </button>
                                 </div>
 
+                                <!-- Register Link -->
                                 <div class="mt-4">
                                     <span class="text-muted">{{ t('auth.noAccount') }}</span>
                                     <a href="#" class="text-decoration-none ms-1 fw-medium"
@@ -81,7 +87,7 @@
 
                         <form v-else-if="currentForm === 'register'" @submit.prevent="handleRegister" class="auth-form"
                             key="register">
-                            
+                            <!-- Register Form -->  
                             <div class="mb-3">
                                 <label for="registerEmail" class="form-label fw-medium">{{ t('auth.email')
                                 }}</label>
@@ -138,7 +144,8 @@
                                 </a>
                             </div>
                         </form>
-
+                        
+                        <!-- Forgot Password Form -->
                         <form v-else-if="currentForm === 'forgot'" @submit.prevent="handleForgotPassword"
                             class="auth-form" key="forgot">
                             <div class="text-center mb-4">
