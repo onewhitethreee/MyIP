@@ -60,7 +60,7 @@
       </nav>
     </header>
 
-    <AuthModal v-if="showAuthModal" :show="showAuthModal" @close="closeAuthModal" />
+    <AuthModal v-show="showAuthModal" :show="showAuthModal" @close="closeAuthModal" />
   </div>
 </template>
 
