@@ -22,8 +22,8 @@
               <label class="form-check-label" for="useEightCards">{{ t('dnsleaktest.UseEightCards') }}</label>
             </div>
             <button @click="checkAllDNSLeakTest(true)"
-              :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']" aria-label="Refresh DNS Leak Test"
-              v-tooltip="t('Tooltips.RefreshDNSLeakTest')">
+              :class="['btn', isDarkMode ? 'btn-dark dark-mode-refresh' : 'btn-light']"
+              aria-label="Refresh DNS Leak Test" v-tooltip="t('Tooltips.RefreshDNSLeakTest')">
               <i class="bi"
                 :class="[isLoading ? 'bi-arrow-repeat spin' : isStarted ? 'bi-arrow-clockwise' : 'bi-caret-right-fill']"></i>
             </button>
@@ -75,7 +75,7 @@
                     ]"></i>
                     {{ t('ipInfos.Country') }}: <span :class="[leak.country !== waitStatus ? 'fw-bold' : '']">{{
                       leak.country
-                      }}&nbsp;</span>
+                    }}&nbsp;</span>
                     <span v-show="leak.country_code" :class="'jn-fl fi fi-' + leak.country_code.toLowerCase()"></span>
                   </span>
                 </div>
